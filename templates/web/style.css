@@ -1,0 +1,135 @@
+body {
+  font-family: system-ui, sans-serif;
+  max-width: 700px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  color: #222;
+}
+
+/* Sin esto, "form label"/"form select"/"form input" (display: block, más
+   abajo) le ganan por origen al [hidden] por defecto del navegador y el
+   elemento igual queda visible aunque tenga el atributo hidden. */
+[hidden] {
+  display: none !important;
+}
+
+form label {
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+form input,
+form select {
+  display: block;
+  width: 100%;
+  padding: 0.4rem;
+  margin-top: 0.25rem;
+  box-sizing: border-box;
+}
+
+.elemento-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.elemento-row input,
+.elemento-row select {
+  width: 100%;
+  padding: 0.3rem;
+  margin-top: 0;
+}
+
+button {
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  margin-top: 0.5rem;
+}
+
+/* === SOLUCIÓN DE ALINEACIÓN HORIZONTAL === */
+
+/* Contenedor flexible para alinear los botones y el resultado en la misma línea */
+.acciones-form {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.acciones-form button {
+  margin-top: 0; /* Remueve el margen superior para igualar alturas */
+}
+
+#resultado {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+#resultado p {
+  margin: 0;
+  display: inline;
+}
+
+#resultado.exito {
+  color: green;
+}
+
+#resultado.error {
+  color: red;
+}
+
+#resultado a {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.8rem;
+  background: #2e7d32;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 4px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* === Toast === */
+
+.toast {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 4px;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transform: translateY(-12px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 1000;
+}
+
+.toast-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast-exito {
+  background: #2e7d32;
+}
+
+.toast-error {
+  background: #c62828;
+}

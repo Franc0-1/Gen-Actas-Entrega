@@ -7,11 +7,6 @@ import (
 	"actas-project/internal/models"
 )
 
-// prefijoNroInventario es el texto fijo que la plantilla antepone al
-// placeholder {{nro_inventario}} (ej. "INV-{{nro_inventario}}"). El dato en
-// sí (Elemento.NroInventario) no lo incluye: el prefijo es presentación.
-const prefijoNroInventario = "INV-"
-
 // aplicarTablas arma las tablas "Retira" y "Entrega" del documento: clona la
 // fila molde una vez por cada elemento correspondiente, o elimina el bloque
 // completo (encabezado + tabla) si no hay elementos para esa dirección.
@@ -127,14 +122,7 @@ func construirBloqueConFilas(bloque string, elementos []models.Elemento) (string
 	for _, elemento := range elementos {
 		fila := molde
 		fila = strings.Replace(fila, "{{descripcion}}", escaparXML(elemento.Descripcion), 1)
-		if elemento.NroInventario == "" {
-			// La plantilla antepone el prefijo fijo "INV-" al placeholder
-			// (ej. "INV-{{nro_inventario}}"). Sin número, se quita también
-			// el prefijo para no dejar la celda con un "INV-" colgando.
-			fila = strings.Replace(fila, prefijoNroInventario+"{{nro_inventario}}", "", 1)
-		} else {
-			fila = strings.Replace(fila, "{{nro_inventario}}", escaparXML(elemento.NroInventario), 1)
-		}
+		fila = strings.Replace(fila, "{{nro_inventario}}", escaparXML(elemento.NroInventario), 1)
 		fila = strings.Replace(fila, "{{cantidad}}", fmt.Sprintf("%d", elemento.Cantidad), 1)
 		filasGeneradas.WriteString(fila)
 	}

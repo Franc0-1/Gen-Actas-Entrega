@@ -158,24 +158,23 @@ func TestGenerate_ActaAmbos(t *testing.T) {
 	}
 
 	// 7. Elementos de "retira" presentes.
-	for _, esperado := range []string{"Notebook Dell Latitude", "INV-1001", "Mouse inalámbrico", "INV-1002"} {
+	for _, esperado := range []string{"Notebook Dell Latitude", "1001", "Mouse inalámbrico", "1002"} {
 		if !strings.Contains(texto, esperado) {
 			t.Errorf("falta el elemento de retira %q en el texto generado", esperado)
 		}
 	}
 
 	// 8. Elementos de "entrega" presentes.
-	for _, esperado := range []string{"Impresora HP LaserJet", "INV-2001", "Monitor Samsung 24\"", "INV-2002", "Teclado USB"} {
+	for _, esperado := range []string{"Impresora HP LaserJet", "2001", "Monitor Samsung 24\"", "2002", "Teclado USB"} {
 		if !strings.Contains(texto, esperado) {
 			t.Errorf("falta el elemento de entrega %q en el texto generado", esperado)
 		}
 	}
 
-	// 8b. "Teclado USB" no tiene NroInventario: la celda debe quedar vacía,
-	// sin el prefijo "INV-" colgando. De los 5 elementos, solo 4 tienen
-	// número de inventario, así que "INV-" debe aparecer exactamente 4 veces.
-	if n := strings.Count(texto, "INV-"); n != 4 {
-		t.Errorf("cantidad de prefijos INV- inesperada: got %d, want 4 (el elemento sin NroInventario no debe mostrar el prefijo)", n)
+	// 8b. La celda "Nro. Inventario" solo debe contener el número, sin
+	// ningún prefijo agregado por la plantilla o el generador.
+	if strings.Contains(texto, "INV-") || strings.Contains(texto, "INV") {
+		t.Errorf("la celda de inventario no debería contener ningún prefijo, solo el número")
 	}
 
 	// 9. Los elementos de retira no deben terminar en la tabla de entrega y
@@ -215,5 +214,44 @@ func TestGenerate_ActaAmbos(t *testing.T) {
 	// 2 filas de encabezado + 2 elementos retira + 3 elementos entrega = 7
 	if filasRetiraYEntrega != 7 {
 		t.Errorf("cantidad de filas <w:tr> inesperada: got %d, want 7", filasRetiraYEntrega)
+	}
+}
+
+// TestGenerate_ActaSoloEntrega verifica que la validación condicional por
+// tipo (QuienRecibe no obligatorio en una acta de tipo "entrega") no rompa
+// el flujo completo de generación del DOCX, no solo Acta.Validate().
+func TestGenerate_ActaSoloEntrega(t *testing.T) {
+	acta := models.Acta{
+		Fecha:            time.Date(2026, time.August, 31, 0, 0, 0, 0, time.UTC),
+		QuienEntrega:     "Juan Pérez",
+		QuienRecibe:      "",
+		Tipo:             models.TipoActaEntrega,
+		AreaDepartamento: "Dirección de Sistemas",
+		Elementos: []models.Elemento{
+			{Descripcion: "Notebook Dell Latitude", NroInventario: "1001", Cantidad: 1, Direccion: models.DireccionRetira},
+		},
+	}
+	outputPath := "../../output/acta_prueba_solo_entrega.docx"
+
+	if err := Generate(acta, plantillaPrueba, outputPath); err != nil {
+		t.Fatalf("Generate devolvió error con acta tipo entrega y QuienRecibe vacío: %v", err)
+	}
+
+	docXML := leerZip(t, outputPath)["word/document.xml"]
+
+	dec := xml.NewDecoder(bytes.NewReader(docXML))
+	for {
+		_, err := dec.Token()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			t.Fatalf("el XML generado no es válido: %v", err)
+		}
+	}
+
+	texto := extraerTexto(t, docXML)
+	if !strings.Contains(texto, "Notebook Dell Latitude") {
+		t.Errorf("falta el elemento de retira en el documento generado")
 	}
 }

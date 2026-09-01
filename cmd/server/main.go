@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 	"strings"
+
+	"actas-project/internal/handlers"
 )
 
 // loadEnv lee un archivo .env simple (KEY=VALUE por línea) y setea
@@ -51,6 +53,9 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", healthHandler)
+	mux.HandleFunc("/api/actas/generar", handlers.GenerarActaHandler)
+	mux.Handle("/", http.FileServer(http.Dir("templates/web")))
+	mux.Handle("/output/", http.StripPrefix("/output/", http.FileServer(http.Dir("output"))))
 
 	addr := ":" + port
 	log.Printf("Servidor escuchando en http://localhost%s", addr)

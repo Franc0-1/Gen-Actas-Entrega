@@ -76,21 +76,53 @@ type Acta struct {
 	Elementos        []Elemento `json:"elementos"`
 }
 
+// valorPorDefectoQuienEntrega se asigna cuando la petición no informa
+// QuienEntrega en una acta que lo requiere: la oficina que entrega equipos
+// es siempre la misma.
+const valorPorDefectoQuienEntrega = "Oficina de Sistemas"
+
+// AplicarValoresPorDefecto completa QuienEntrega con el valor institucional
+// fijo cuando viene vacío y el tipo de acta lo requiere (entrega o ambos).
+// Debe llamarse antes de Validate().
+func (a *Acta) AplicarValoresPorDefecto() {
+	if a.QuienEntrega == "" && (a.Tipo == TipoActaEntrega || a.Tipo == TipoActaAmbos) {
+		a.QuienEntrega = valorPorDefectoQuienEntrega
+	}
+}
+
 // Validate verifica que el acta tenga los datos mínimos necesarios para
 // poder generarse. No valida reglas de negocio más allá de eso.
 func (a Acta) Validate() error {
 	if a.Fecha.IsZero() {
 		return errors.New("el acta debe tener una fecha")
 	}
-	if a.QuienEntrega == "" {
-		return errors.New("el acta debe indicar quién entrega")
-	}
-	if a.QuienRecibe == "" {
-		return errors.New("el acta debe indicar quién recibe")
-	}
 	if !a.Tipo.esValido() {
 		return errors.New("el tipo de acta no es válido")
 	}
+	if a.Fecha.After(time.Now()) {
+		return errors.New("la fecha del acta no puede ser futura")
+	}
+
+	// Quién entrega y quién recibe se exigen según el tipo de acta: una
+	// entrega pura no necesita quién recibe, y viceversa.
+	switch a.Tipo {
+	case TipoActaEntrega:
+		if a.QuienEntrega == "" {
+			return errors.New("el acta debe indicar quién entrega")
+		}
+	case TipoActaRecibimiento:
+		if a.QuienRecibe == "" {
+			return errors.New("el acta debe indicar quién recibe")
+		}
+	case TipoActaAmbos:
+		if a.QuienEntrega == "" {
+			return errors.New("el acta debe indicar quién entrega")
+		}
+		if a.QuienRecibe == "" {
+			return errors.New("el acta debe indicar quién recibe")
+		}
+	}
+
 	if a.AreaDepartamento == "" {
 		return errors.New("el acta debe indicar el área o departamento")
 	}

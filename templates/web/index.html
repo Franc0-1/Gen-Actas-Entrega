@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Generador de Actas</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Generar Acta</h1>
+
+  <form id="acta-form">
+    <label>
+      Fecha
+      <input type="date" id="fecha" required>
+    </label>
+
+    <label>
+      Quién entrega
+      <input type="text" id="quienEntrega" value="Oficina de Sistemas" required>
+    </label>
+
+    <label>
+      Quién recibe
+      <input type="text" id="quienRecibe" required>
+    </label>
+
+    <label>
+      Tipo de acta
+      <select id="tipo">
+        <option value="entrega">Entrega</option>
+        <option value="recibimiento">Recibimiento</option>
+        <option value="ambos">Ambos</option>
+      </select>
+    </label>
+
+    <label>
+      Área/Departamento
+      <input type="text" id="areaDepartamento" required>
+    </label>
+
+    <h2>Elementos</h2>
+    <div id="elementos-container"></div>
+
+    <div class="acciones-form">
+      <button type="button" id="agregar-elemento">+ Agregar elemento</button>
+      <button type="submit">Generar Acta</button>
+      <div id="resultado"></div>
+    </div>
+  </form>
+
+  <script src="app.js"></script>
+</body>
+</html>
