@@ -40,11 +40,11 @@ func nombreBaseActa(acta models.Acta) string {
 	var base string
 	switch acta.Tipo {
 	case models.TipoActaEntrega:
-		base = fmt.Sprintf("Acta de Entrega - %s - %s", acta.QuienEntrega, fecha)
+		base = fmt.Sprintf("Acta de Entrega - %s - %s", acta.AreaDepartamento, fecha)
 	case models.TipoActaRecibimiento:
-		base = fmt.Sprintf("Acta de Recibimiento - %s - %s", acta.QuienRecibe, fecha)
+		base = fmt.Sprintf("Acta de Recibimiento - %s - %s", acta.AreaDepartamento, fecha)
 	default: // models.TipoActaAmbos
-		base = fmt.Sprintf("Acta - %s - %s - %s", acta.QuienEntrega, acta.QuienRecibe, fecha)
+		base = fmt.Sprintf("Acta - %s - %s - %s", acta.AreaDepartamento, acta.QuienRecibe, fecha)
 	}
 
 	return sanitizarNombreArchivo(base)

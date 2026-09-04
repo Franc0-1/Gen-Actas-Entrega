@@ -9,6 +9,7 @@
 <body>
   <div class="card">
     <h1>Generar actas de entrega</h1>
+    <p class="subtitle">Completá los datos para generar el acta en PDF, lista para descargar.</p>
 
     <form id="acta-form">
       <section class="form-section">
@@ -53,21 +54,20 @@
       <section class="form-section">
         <h2>Elementos</h2>
         <div class="elementos-list">
-          <div class="elementos-header" aria-hidden="true">
-            <span>Descripción</span>
-            <span>Nro. Inventario</span>
-            <span>Cantidad</span>
-            <span class="col-direccion">Dirección</span>
-            <span>Observación</span>
-            <span></span>
-          </div>
+        <div class="elementos-header" aria-hidden="true">
+              <span>Descripción</span>
+              <span>Nro. Inventario</span>
+              <span>Cantidad</span>
+              <span class="col-direccion">Dirección</span>
+              <span>Observación</span>
+              <span></span> <!-- Espacio para alinearse con los botones -->
+            </div>
           <div id="elementos-container"></div>
         </div>
         <button type="button" id="agregar-elemento" class="btn btn-secondary">+ Agregar elemento</button>
       </section>
 
       <section class="form-section form-section--acciones">
-        <h2>Acciones</h2>
         <div class="acciones-form">
           <button type="submit" class="btn btn-primary">Generar Acta</button>
         </div>

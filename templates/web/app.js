@@ -74,6 +74,7 @@ function actualizarCamposPorTipo() {
   const mostrarEntrega = tipo === 'entrega' || tipo === 'ambos';
   const mostrarRecibe = tipo === 'recibimiento' || tipo === 'ambos';
 
+  document.body.classList.toggle('modo-ambos', tipo === 'ambos');
   // QuienEntrega conserva su valor (por defecto "Oficina de Sistemas") al
   // ocultarse: no tiene sentido pedirlo de nuevo cada vez que se vuelve a
   // mostrar, a diferencia de QuienRecibe que sí se vacía.
