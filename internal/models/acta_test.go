@@ -158,4 +158,51 @@ func TestValidate_CamposSiempreObligatorios(t *testing.T) {
 			t.Error("debería rechazar un tipo de acta desconocido")
 		}
 	})
+
+	t.Run("inválida con fecha futura", func(t *testing.T) {
+		acta := actaBase(TipoActaEntrega)
+		acta.Fecha = time.Now().AddDate(0, 0, 1)
+		acta.QuienEntrega = "Juan Pérez"
+		acta.Elementos = []Elemento{elementoRetira()}
+
+		if err := acta.Validate(); err == nil {
+			t.Error("debería rechazar una fecha futura")
+		}
+	})
+}
+
+func TestValidate_NroInventario(t *testing.T) {
+	t.Run("inválida con letras en NroInventario", func(t *testing.T) {
+		acta := actaBase(TipoActaEntrega)
+		acta.QuienEntrega = "Juan Pérez"
+		elemento := elementoRetira()
+		elemento.NroInventario = "INV-1001"
+		acta.Elementos = []Elemento{elemento}
+
+		if err := acta.Validate(); err == nil {
+			t.Error("debería rechazar un número de inventario con caracteres no numéricos")
+		}
+	})
+
+	t.Run("válida con NroInventario solo dígitos", func(t *testing.T) {
+		acta := actaBase(TipoActaEntrega)
+		acta.QuienEntrega = "Juan Pérez"
+		elemento := elementoRetira()
+		elemento.NroInventario = "1001"
+		acta.Elementos = []Elemento{elemento}
+
+		if err := acta.Validate(); err != nil {
+			t.Errorf("no debería rechazar un número de inventario solo con dígitos, error: %v", err)
+		}
+	})
+
+	t.Run("válida con NroInventario vacío", func(t *testing.T) {
+		acta := actaBase(TipoActaEntrega)
+		acta.QuienEntrega = "Juan Pérez"
+		acta.Elementos = []Elemento{elementoRetira()} // NroInventario vacío por defecto
+
+		if err := acta.Validate(); err != nil {
+			t.Errorf("NroInventario es opcional, no debería fallar vacío, error: %v", err)
+		}
+	})
 }

@@ -9,8 +9,8 @@ import (
 )
 
 // GenerarActaHandler atiende POST /api/actas/generar: recibe un Acta en
-// JSON, lo valida, genera el DOCX correspondiente y responde con la ruta
-// del archivo generado.
+// JSON, lo valida, genera el DOCX y lo convierte a PDF (services.GenerarActa
+// se encarga de ambos pasos), y responde con la ruta del PDF resultante.
 func GenerarActaHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		responderJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "método no permitido"})

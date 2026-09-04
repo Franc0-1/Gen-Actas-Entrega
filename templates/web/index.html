@@ -2,51 +2,78 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Generador de Actas</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Generar Acta</h1>
+  <div class="card">
+    <h1>Generar actas de entrega</h1>
 
-  <form id="acta-form">
-    <label>
-      Fecha
-      <input type="date" id="fecha" required>
-    </label>
+    <form id="acta-form">
+      <section class="form-section">
+        <h2>Datos del acta</h2>
+        <div class="form-grid">
+          <label>
+            Fecha
+            <input type="date" id="fecha" required>
+          </label>
 
-    <label>
-      Quién entrega
-      <input type="text" id="quienEntrega" value="Oficina de Sistemas" required>
-    </label>
+          <label>
+            Tipo de acta
+            <select id="tipo">
+              <option value="entrega">Entrega</option>
+              <option value="recibimiento">Recibimiento</option>
+              <option value="ambos">Ambos</option>
+            </select>
+          </label>
 
-    <label>
-      Quién recibe
-      <input type="text" id="quienRecibe" required>
-    </label>
+          <label>
+            Área/Departamento
+            <input type="text" id="areaDepartamento" required>
+          </label>
+        </div>
+      </section>
 
-    <label>
-      Tipo de acta
-      <select id="tipo">
-        <option value="entrega">Entrega</option>
-        <option value="recibimiento">Recibimiento</option>
-        <option value="ambos">Ambos</option>
-      </select>
-    </label>
+      <section class="form-section">
+        <h2>Participantes</h2>
+        <div class="form-grid">
+          <label>
+            Quién entrega
+            <input type="text" id="quienEntrega" value="Oficina de Sistemas" required>
+          </label>
 
-    <label>
-      Área/Departamento
-      <input type="text" id="areaDepartamento" required>
-    </label>
+          <label>
+            Quién recibe
+            <input type="text" id="quienRecibe" required>
+          </label>
+        </div>
+      </section>
 
-    <h2>Elementos</h2>
-    <div id="elementos-container"></div>
+      <section class="form-section">
+        <h2>Elementos</h2>
+        <div class="elementos-list">
+          <div class="elementos-header" aria-hidden="true">
+            <span>Descripción</span>
+            <span>Nro. Inventario</span>
+            <span>Cantidad</span>
+            <span class="col-direccion">Dirección</span>
+            <span>Observación</span>
+            <span></span>
+          </div>
+          <div id="elementos-container"></div>
+        </div>
+        <button type="button" id="agregar-elemento" class="btn btn-secondary">+ Agregar elemento</button>
+      </section>
 
-    <div class="acciones-form">
-      <button type="button" id="agregar-elemento">+ Agregar elemento</button>
-      <button type="submit">Generar Acta</button>
-      <div id="resultado"></div>
-    </div>
-  </form>
+      <section class="form-section form-section--acciones">
+        <h2>Acciones</h2>
+        <div class="acciones-form">
+          <button type="submit" class="btn btn-primary">Generar Acta</button>
+        </div>
+      </section>
+    </form>
+  </div>
 
   <script src="app.js"></script>
 </body>

@@ -63,7 +63,20 @@ func (e Elemento) Validate() error {
 	if !e.Direccion.esValido() {
 		return errors.New("la dirección del elemento no es válida")
 	}
+	if e.NroInventario != "" && !esSoloDigitos(e.NroInventario) {
+		return errors.New("el número de inventario solo debe contener dígitos")
+	}
 	return nil
+}
+
+// esSoloDigitos indica si el string contiene únicamente caracteres 0-9.
+func esSoloDigitos(s string) bool {
+	for _, r := range s {
+		if r < '0' || r > '9' {
+			return false
+		}
+	}
+	return true
 }
 
 // Acta representa un acta de entrega, recibimiento o ambos, con sus elementos.
