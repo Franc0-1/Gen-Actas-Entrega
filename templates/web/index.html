@@ -8,8 +8,13 @@
 </head>
 <body>
   <div class="card">
-    <h1>Generar actas de entrega</h1>
-    <p class="subtitle">Completá los datos para generar el acta en PDF, lista para descargar.</p>
+    <div class="card-header">
+      <div>
+        <h1>Generar actas de entrega</h1>
+        <p class="subtitle">Completá los datos para generar el acta en PDF, lista para descargar.</p>
+      </div>
+      <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Cambiar a modo oscuro">🌙</button>
+    </div>
 
     <form id="acta-form">
       <section class="form-section">
@@ -31,7 +36,18 @@
 
           <label>
             Área/Departamento
-            <input type="text" id="areaDepartamento" required>
+            <select id="areaDepartamento" required>
+              <option value="" selected disabled>Seleccionar...</option>
+              <option value="Área 1">Área 1</option>
+              <option value="Área 2">Área 2</option>
+              <option value="Área 3">Área 3</option>
+              <option value="otros">Otros</option>
+            </select>
+          </label>
+
+          <label id="areaDepartamentoOtraLabel" hidden>
+            Especificar área/departamento
+            <input type="text" id="areaDepartamentoOtra">
           </label>
         </div>
       </section>
@@ -56,7 +72,7 @@
         <div class="elementos-list">
         <div class="elementos-header" aria-hidden="true">
               <span>Descripción</span>
-              <span>Nro. Inventario</span>
+              <span>Nro. Inv</span>
               <span>Cantidad</span>
               <span class="col-direccion">Dirección</span>
               <span>Observación</span>

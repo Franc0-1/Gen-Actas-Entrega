@@ -1,3 +1,41 @@
+const CLAVE_TEMA = 'actas-tema';
+const botonTema = document.getElementById('theme-toggle');
+
+// aplicarTema alterna la clase que redefine las variables CSS de color
+// (ver body.dark-theme en style.css) y actualiza el ícono/label del botón.
+function aplicarTema(esOscuro) {
+  document.body.classList.toggle('dark-theme', esOscuro);
+  botonTema.textContent = esOscuro ? '☀︎' : '⏾';
+  botonTema.setAttribute('aria-label', esOscuro ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
+}
+
+// Sin preferencia guardada en localStorage, se usa prefers-color-scheme del
+// sistema operativo/navegador.
+function temaGuardadoEsOscuro() {
+  let guardado = null;
+  try {
+    guardado = localStorage.getItem(CLAVE_TEMA);
+  } catch (error) {
+    guardado = null;
+  }
+  if (guardado === 'oscuro') return true;
+  if (guardado === 'claro') return false;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
+aplicarTema(temaGuardadoEsOscuro());
+
+botonTema.addEventListener('click', () => {
+  const esOscuro = !document.body.classList.contains('dark-theme');
+  aplicarTema(esOscuro);
+  try {
+    localStorage.setItem(CLAVE_TEMA, esOscuro ? 'oscuro' : 'claro');
+  } catch (error) {
+    // localStorage no disponible (ej. navegación privada): el tema no
+    // persiste entre sesiones, pero el toggle sigue funcionando.
+  }
+});
+
 const form = document.getElementById('acta-form');
 const elementosContainer = document.getElementById('elementos-container');
 
@@ -9,6 +47,21 @@ const labelQuienRecibe = campoQuienRecibe.closest('label');
 
 const campoFecha = document.getElementById('fecha');
 const headerDireccion = document.querySelector('.elementos-header .col-direccion');
+
+const selectAreaDepartamento = document.getElementById('areaDepartamento');
+const campoAreaDepartamentoOtra = document.getElementById('areaDepartamentoOtra');
+const labelAreaDepartamentoOtra = campoAreaDepartamentoOtra.closest('label');
+
+// Con "Otros" seleccionado se pide el nombre puntual del área en un input
+// aparte, que se manda como areaDepartamento en vez del valor del select.
+function actualizarAreaDepartamentoOtra() {
+  const esOtros = selectAreaDepartamento.value === 'otros';
+  labelAreaDepartamentoOtra.hidden = !esOtros;
+  campoAreaDepartamentoOtra.required = esOtros;
+}
+
+selectAreaDepartamento.addEventListener('change', actualizarAreaDepartamentoOtra);
+actualizarAreaDepartamentoOtra();
 
 // Por defecto la fecha es la de hoy (fecha local del navegador); el
 // usuario sigue pudiendo cambiarla, no queda bloqueada.
@@ -260,12 +313,16 @@ form.addEventListener('submit', async (event) => {
     return;
   }
 
+  const areaDepartamento = selectAreaDepartamento.value === 'otros'
+    ? campoAreaDepartamentoOtra.value
+    : selectAreaDepartamento.value;
+
   const acta = {
     fecha,
     quienEntrega: document.getElementById('quienEntrega').value,
     quienRecibe: document.getElementById('quienRecibe').value,
     tipo: document.getElementById('tipo').value,
-    areaDepartamento: document.getElementById('areaDepartamento').value,
+    areaDepartamento,
     elementos: leerElementos(),
   };
 

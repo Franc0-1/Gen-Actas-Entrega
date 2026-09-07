@@ -124,6 +124,7 @@ func construirBloqueConFilas(bloque string, elementos []models.Elemento) (string
 		fila = strings.Replace(fila, "{{descripcion}}", escaparXML(elemento.Descripcion), 1)
 		fila = strings.Replace(fila, "{{nro_inventario}}", escaparXML(elemento.NroInventario), 1)
 		fila = strings.Replace(fila, "{{cantidad}}", fmt.Sprintf("%d", elemento.Cantidad), 1)
+		fila = strings.Replace(fila, "{{observacion}}", escaparXML(elemento.Observacion), 1)
 		filasGeneradas.WriteString(fila)
 	}
 
