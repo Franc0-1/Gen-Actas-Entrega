@@ -71,6 +71,9 @@ func (e Elemento) Validate() error {
 
 // esSoloDigitos indica si el string contiene únicamente caracteres 0-9.
 func esSoloDigitos(s string) bool {
+	if len(s) == 0 || len(s) > 8 {
+		return false
+	}
 	for _, r := range s {
 		if r < '0' || r > '9' {
 			return false

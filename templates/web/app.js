@@ -158,7 +158,7 @@ function crearFilaElemento(datosIniciales) {
   fila.className = 'elemento-row';
   fila.innerHTML = `
     <input type="text" class="elemento-descripcion" placeholder="Descripción" required>
-    <input type="text" class="elemento-nroInventario" placeholder="Nro. Inventario" inputmode="numeric" pattern="[0-9]*">
+    <input type="text" class="elemento-nroInventario" placeholder="Nro. Inventario" inputmode="numeric" pattern="[0-9]*" maxlength="8">
     <input type="number" class="elemento-cantidad" placeholder="Cantidad" min="1" step="1" inputmode="numeric" value="1" required>
     <select class="elemento-direccion">
       <option value="retira">Retira</option>

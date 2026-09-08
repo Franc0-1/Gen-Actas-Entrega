@@ -184,6 +184,20 @@ form select:focus {
   box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
+/* Sin esto, el autocompletado del navegador (ej. Chrome recordando lo
+   tipeado en "Especificar área/departamento") fuerza fondo blanco y texto
+   oscuro con sus propios estilos internos, ignorando el tema activo. */
+form input:-webkit-autofill,
+form input:-webkit-autofill:hover,
+form input:-webkit-autofill:focus {
+  border-color: var(--color-border);
+  -webkit-text-fill-color: var(--color-text);
+  caret-color: var(--color-text);
+  -webkit-box-shadow: 0 0 0 1000px var(--color-input-bg) inset;
+  box-shadow: 0 0 0 1000px var(--color-input-bg) inset;
+  transition: background-color 5000s ease-in-out 0s, border-color 0.15s ease, color 0.15s ease;
+}
+
 .elementos-list {
   overflow-x: auto;
   margin-bottom: 0.75rem;
