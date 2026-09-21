@@ -13,7 +13,8 @@ import (
 
 const (
 	plantillaPath = "templates/docx/plantilla_acta.docx"
-	outputDir     = "output"
+	outputDir     = "output/Docx"
+	outputDirPDF  = "output/PDF"
 )
 
 // caracteresInvalidosArchivo son los caracteres que Windows (y, por
@@ -84,7 +85,7 @@ func GenerarActa(acta models.Acta) (string, error) {
 		return "", err
 	}
 
-	pdfPath, err := generator.ConvertirAPDF(docxPath, outputDir)
+	pdfPath, err := generator.ConvertirAPDF(docxPath, outputDirPDF)
 	if err != nil {
 		return "", err
 	}

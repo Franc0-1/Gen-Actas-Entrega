@@ -39,7 +39,7 @@ func GenerarActaHandler(w http.ResponseWriter, r *http.Request) {
 	responderJSON(w, http.StatusCreated, map[string]string{
 		"mensaje":     "acta generada correctamente",
 		"archivo":     nombreArchivo,
-		"descargaUrl": "/output/" + nombreArchivo,
+		"descargaUrl": "/output/PDF/" + nombreArchivo,
 	})
 }
 
