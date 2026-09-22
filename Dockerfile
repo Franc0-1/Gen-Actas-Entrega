@@ -15,9 +15,10 @@ FROM debian:bookworm-slim
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         libreoffice-writer \
+        unoconv \
         fonts-dejavu-core \
         fonts-liberation2 \
-        tini \
+        supervisor \
         curl \
         ca-certificates && \
     rm -rf /var/lib/apt/lists/*
@@ -26,10 +27,10 @@ WORKDIR /app
 
 COPY --from=builder /build/server ./server
 COPY templates ./templates
-COPY docker/entrypoint.sh ./entrypoint.sh
-RUN chmod +x ./entrypoint.sh && mkdir -p output/Docx output/PDF
+COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+RUN mkdir -p output/Docx output/PDF
 
 ENV PORT=8080
 EXPOSE 8080
 
-ENTRYPOINT ["/usr/bin/tini", "--", "./entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

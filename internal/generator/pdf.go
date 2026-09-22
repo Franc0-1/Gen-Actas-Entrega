@@ -41,13 +41,81 @@ func resolverComandoSoffice() string {
 // listener UNO, que es un cambio de arquitectura mayor a esta función.
 var perfilLibreOfficeURI = "file:///" + filepath.ToSlash(filepath.Join(os.TempDir(), "actas-libreoffice-profile"))
 
-// ConvertirAPDF convierte un .docx ya generado a PDF usando LibreOffice en
-// modo headless. No modifica ni reemplaza el DOCX de entrada: el PDF se
-// escribe en outputDir con el mismo nombre base. Devuelve la ruta del PDF
-// generado.
+// nombreComandoUnoconv ubica el cliente unoconv, usado en Linux/Docker para
+// delegar la conversión al listener UNO persistente (ver
+// docker/supervisord.conf, puerto 127.0.0.1:2002) en vez de arrancar una
+// instancia de soffice por cada conversión. Se puede sobreescribir con la
+// variable de entorno UNOCONV_PATH.
+var nombreComandoUnoconv = resolverComandoUnoconv()
+
+func resolverComandoUnoconv() string {
+	if ruta := os.Getenv("UNOCONV_PATH"); ruta != "" {
+		return ruta
+	}
+	return "unoconv"
+}
+
+// ConvertirAPDF convierte un .docx ya generado a PDF. No modifica ni
+// reemplaza el DOCX de entrada. Devuelve la ruta del PDF generado.
+//
+// En Linux (contenedor Docker) reutiliza el listener UNO persistente vía
+// unoconv, evitando el costo de arrancar soffice en cada conversión. En
+// Windows (desarrollo local) arranca una instancia de soffice puntual, como
+// antes, porque no hay listener persistente corriendo ahí.
 func ConvertirAPDF(docxPath, outputDirPDF string) (string, error) {
+	nombreBase := strings.TrimSuffix(filepath.Base(docxPath), filepath.Ext(docxPath))
+	pdfPath := filepath.Join(outputDirPDF, nombreBase+".pdf")
+
+	var err error
+	if runtime.GOOS == "windows" {
+		err = convertirConSofficeDirecto(docxPath, outputDirPDF)
+	} else {
+		err = convertirConUnoconv(docxPath, pdfPath)
+	}
+	if err != nil {
+		return "", err
+	}
+
+	if _, err := os.Stat(pdfPath); err != nil {
+		return "", fmt.Errorf("la conversión a PDF no generó el archivo esperado (%s): %w", pdfPath, err)
+	}
+
+	return pdfPath, nil
+}
+
+// convertirConUnoconv delega la conversión a la instancia de soffice ya
+// activa (listener UNO en 127.0.0.1:2002) a través de unoconv, sin arrancar
+// un soffice nuevo.
+func convertirConUnoconv(docxPath, pdfPath string) error {
+	if _, err := exec.LookPath(nombreComandoUnoconv); err != nil {
+		return fmt.Errorf("unoconv (%s) no está instalado: %w", nombreComandoUnoconv, err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), timeoutConversionPDF)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, nombreComandoUnoconv,
+		"-f", "pdf",
+		"-o", pdfPath,
+		docxPath,
+	)
+
+	salida, err := cmd.CombinedOutput()
+	if err != nil {
+		if ctx.Err() == context.DeadlineExceeded {
+			return fmt.Errorf("la conversión a PDF superó el tiempo máximo configurado (%s)", timeoutConversionPDF)
+		}
+		return fmt.Errorf("no se pudo convertir %s a PDF: %w (salida: %s)", docxPath, err, strings.TrimSpace(string(salida)))
+	}
+	return nil
+}
+
+// convertirConSofficeDirecto arranca una instancia de soffice puntual para
+// la conversión (modo de desarrollo local en Windows, sin listener UNO
+// persistente).
+func convertirConSofficeDirecto(docxPath, outputDirPDF string) error {
 	if _, err := exec.LookPath(nombreComandoSoffice); err != nil {
-		return "", fmt.Errorf("LibreOffice (%s) no está instalado: %w", nombreComandoSoffice, err)
+		return fmt.Errorf("LibreOffice (%s) no está instalado: %w", nombreComandoSoffice, err)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), timeoutConversionPDF)
@@ -67,17 +135,9 @@ func ConvertirAPDF(docxPath, outputDirPDF string) (string, error) {
 	salida, err := cmd.CombinedOutput()
 	if err != nil {
 		if ctx.Err() == context.DeadlineExceeded {
-			return "", fmt.Errorf("la conversión a PDF superó el tiempo máximo configurado (%s)", timeoutConversionPDF)
+			return fmt.Errorf("la conversión a PDF superó el tiempo máximo configurado (%s)", timeoutConversionPDF)
 		}
-		return "", fmt.Errorf("no se pudo convertir %s a PDF: %w (salida: %s)", docxPath, err, strings.TrimSpace(string(salida)))
+		return fmt.Errorf("no se pudo convertir %s a PDF: %w (salida: %s)", docxPath, err, strings.TrimSpace(string(salida)))
 	}
-
-	nombreBase := strings.TrimSuffix(filepath.Base(docxPath), filepath.Ext(docxPath))
-	pdfPath := filepath.Join(outputDirPDF, nombreBase+".pdf")
-
-	if _, err := os.Stat(pdfPath); err != nil {
-		return "", fmt.Errorf("la conversión a PDF no generó el archivo esperado (%s): %w", pdfPath, err)
-	}
-
-	return pdfPath, nil
+	return nil
 }
