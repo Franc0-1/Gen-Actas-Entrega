@@ -1,0 +1,8 @@
+192.168.106.37 {
+	tls internal
+	reverse_proxy actas:8080
+}
+
+:80 {
+	redir https://192.168.106.37{uri} permanent
+}
