@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -16,6 +17,18 @@ const (
 	outputDir     = "output/Docx"
 	outputDirPDF  = "output/PDF"
 )
+
+// Los directorios de salida pueden no existir todavía en un contenedor
+// recién desplegado (ej. un bind mount de Docker cuyo lado del host está
+// vacío tapa lo que haya creado la imagen), así que se garantizan acá en
+// vez de asumir que ya están creados.
+func init() {
+	for _, dir := range []string{outputDir, outputDirPDF} {
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			log.Fatalf("no se pudo crear el directorio de salida %s: %v", dir, err)
+		}
+	}
+}
 
 // caracteresInvalidosArchivo son los caracteres que Windows (y, por
 // prudencia, el resto de los SO) no permiten en un nombre de archivo.
