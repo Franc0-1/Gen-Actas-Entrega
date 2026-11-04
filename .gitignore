@@ -1,4 +1,31 @@
+# --- Secretos y configuración local ---
+# .env solo define variables locales (ej. PORT); nunca se versiona.
 .env
+.env.*
+!.env.example
+
+# --- Documentos generados por la aplicación (y por los tests) ---
+# Las plantillas viven en templates/docx/ y SÍ se versionan.
 /output/*
 !/output/.gitkeep
+
+# --- Binarios de Go ---
 *.exe
+/server
+*.test
+*.out
+
+# --- Archivos de bloqueo de Word/LibreOffice al editar plantillas ---
+~$*
+.~lock.*#
+
+# --- Configuración personal de herramientas ---
+.claude/launch.json
+.claude/settings.local.json
+.vscode/
+.idea/
+
+# --- Sistema operativo ---
+Thumbs.db
+desktop.ini
+.DS_Store

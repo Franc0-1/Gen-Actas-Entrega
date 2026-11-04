@@ -2,10 +2,10 @@ const CLAVE_TEMA = 'actas-tema';
 const botonTema = document.getElementById('theme-toggle');
 
 // aplicarTema alterna la clase que redefine las variables CSS de color
-// (ver body.dark-theme en style.css) y actualiza el ícono/label del botón.
+// (ver body.dark-theme en style.css) y actualiza el label del botón; el
+// ícono sol/luna lo alterna el CSS según esa misma clase.
 function aplicarTema(esOscuro) {
   document.body.classList.toggle('dark-theme', esOscuro);
-  botonTema.textContent = esOscuro ? '☀︎' : '⏾';
   botonTema.setAttribute('aria-label', esOscuro ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
 }
 
@@ -36,17 +36,30 @@ botonTema.addEventListener('click', () => {
   }
 });
 
-const form = document.getElementById('acta-form');
+const form = document.getElementById('doc-form');
 const elementosContainer = document.getElementById('elementos-container');
 
+// El documento (acta o nota de retiro) se elige con los radios
+// name="documento" de #doc-picker; el tipo de acta sigue siendo el select #tipo.
+const docPicker = document.getElementById('doc-picker');
+const documentoActual = () => form.elements.documento.value;
+const esRetiro = () => documentoActual() === 'retiro';
 const tipoSelect = document.getElementById('tipo');
+const tipoActual = () => tipoSelect.value;
 const campoQuienEntrega = document.getElementById('quienEntrega');
-const campoQuienRecibe = document.getElementById('quienRecibe');
 const labelQuienEntrega = campoQuienEntrega.closest('label');
-const labelQuienRecibe = campoQuienRecibe.closest('label');
+const textoAreaDepartamento = document.getElementById('areaDepartamentoTexto');
+
+// El campo "Quién recibe" se reemplazó por el área: su texto indica qué rol
+// cumple el área según el tipo de acta.
+const TEXTO_AREA_POR_TIPO = {
+  entrega: 'Área/Departamento que recibe',
+  recibimiento: 'Área/Departamento que entrega',
+  ambos: 'Área/Departamento que entrega y recibe',
+};
 
 const campoFecha = document.getElementById('fecha');
-const headerDireccion = document.querySelector('.elementos-header .col-direccion');
+const headerDireccion = document.querySelector('.items-head .col-direccion');
 
 const selectAreaDepartamento = document.getElementById('areaDepartamento');
 const campoAreaDepartamentoOtra = document.getElementById('areaDepartamentoOtra');
@@ -113,9 +126,9 @@ function aplicarDireccionEnFila(fila, tipo) {
   const forzada = direccionForzada(tipo);
   if (forzada) {
     selectDireccion.value = forzada;
-    selectDireccion.hidden = true;
+    selectDireccion.closest('.campo').hidden = true;
   } else {
-    selectDireccion.hidden = false;
+    selectDireccion.closest('.campo').hidden = false;
   }
 }
 
@@ -123,20 +136,17 @@ function aplicarDireccionEnFila(fila, tipo) {
 // de persona según el tipo elegido, y resincroniza la dirección de todas las
 // filas de elementos ya creadas.
 function actualizarCamposPorTipo() {
-  const tipo = tipoSelect.value;
+  const tipo = tipoActual();
   const mostrarEntrega = tipo === 'entrega' || tipo === 'ambos';
-  const mostrarRecibe = tipo === 'recibimiento' || tipo === 'ambos';
 
   document.body.classList.toggle('modo-ambos', tipo === 'ambos');
   // QuienEntrega conserva su valor (por defecto "Oficina de Sistemas") al
   // ocultarse: no tiene sentido pedirlo de nuevo cada vez que se vuelve a
-  // mostrar, a diferencia de QuienRecibe que sí se vacía.
+  // mostrar.
   labelQuienEntrega.hidden = !mostrarEntrega;
   campoQuienEntrega.required = mostrarEntrega;
 
-  labelQuienRecibe.hidden = !mostrarRecibe;
-  campoQuienRecibe.required = mostrarRecibe;
-  if (!mostrarRecibe) campoQuienRecibe.value = '';
+  textoAreaDepartamento.textContent = TEXTO_AREA_POR_TIPO[tipo];
 
   // Misma condición que aplicarDireccionEnFila: si el tipo fuerza una
   // única dirección, la columna de la cabecera se oculta igual que el
@@ -149,6 +159,7 @@ function actualizarCamposPorTipo() {
 }
 
 tipoSelect.addEventListener('change', actualizarCamposPorTipo);
+docPicker.addEventListener('change', actualizarDocumento);
 
 // crearFilaElemento arma una fila nueva. Si se le pasan datosIniciales
 // (usado al duplicar), prellena descripción/nroInventario/observación/
@@ -156,18 +167,41 @@ tipoSelect.addEventListener('change', actualizarCamposPorTipo);
 function crearFilaElemento(datosIniciales) {
   const fila = document.createElement('div');
   fila.className = 'elemento-row';
+  // Cada campo va dentro de un <label class="campo">: el texto del label es
+  // el nombre accesible y en pantallas chicas (sin cabecera de tabla) se
+  // muestra arriba del input.
   fila.innerHTML = `
-    <input type="text" class="elemento-descripcion" placeholder="Descripción" required>
-    <input type="text" class="elemento-nroInventario" placeholder="Nro. Inventario" inputmode="numeric" pattern="[0-9]*" maxlength="8">
-    <input type="number" class="elemento-cantidad" placeholder="Cantidad" min="1" step="1" inputmode="numeric" value="1" required>
-    <select class="elemento-direccion">
-      <option value="retira">Retira</option>
-      <option value="entrega">Entrega</option>
-    </select>
-    <input type="text" class="elemento-observacion" placeholder="Observación">
+    <span class="elemento-numero" aria-hidden="true"></span>
+    <label class="campo campo--descripcion">
+      <span class="campo-label">Descripción</span>
+      <input type="text" class="elemento-descripcion" placeholder="Ej. Monitor Samsung 24&quot;" required>
+    </label>
+    <label class="campo">
+      <span class="campo-label">Nro. Inventario</span>
+      <input type="text" class="elemento-nroInventario" placeholder="00000000" inputmode="numeric" pattern="[0-9]*" maxlength="8">
+    </label>
+    <label class="campo">
+      <span class="campo-label">Cantidad</span>
+      <input type="number" class="elemento-cantidad" placeholder="1" min="1" step="1" inputmode="numeric" value="1" required>
+    </label>
+    <label class="campo">
+      <span class="campo-label">Dirección</span>
+      <select class="elemento-direccion">
+        <option value="retira">Retira</option>
+        <option value="entrega">Entrega</option>
+      </select>
+    </label>
+    <label class="campo campo--observacion">
+      <span class="campo-label">Observación</span>
+      <input type="text" class="elemento-observacion" placeholder="Opcional">
+    </label>
     <div class="elemento-acciones">
-      <button type="button" class="duplicar-elemento">Duplicar</button>
-      <button type="button" class="quitar-elemento">Quitar</button>
+      <button type="button" class="icon-btn duplicar-elemento" aria-label="Duplicar elemento" title="Duplicar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      </button>
+      <button type="button" class="icon-btn icon-btn--danger quitar-elemento" aria-label="Quitar elemento" title="Quitar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+      </button>
     </div>
   `;
 
@@ -181,7 +215,7 @@ function crearFilaElemento(datosIniciales) {
   }
 
   elementosContainer.appendChild(fila);
-  aplicarDireccionEnFila(fila, tipoSelect.value);
+  aplicarDireccionEnFila(fila, tipoActual());
 
   const campoNroInventario = fila.querySelector('.elemento-nroInventario');
   campoNroInventario.addEventListener('input', () => {
@@ -233,7 +267,7 @@ function eliminarFila(fila) {
   }
 }
 
-document.getElementById('agregar-elemento').addEventListener('click', () => agregarFilaYEnfocar());
+document.getElementById('agregar-elemento').addEventListener('click', () => (esRetiro() ? agregarElementoRetiro() : agregarFilaYEnfocar()));
 
 // Enter en el último campo (Observación) de la última fila agrega una fila
 // nueva en vez de enviar el formulario. En cualquier otro campo, Enter no
@@ -250,8 +284,77 @@ elementosContainer.addEventListener('keydown', (event) => {
   agregarFilaYEnfocar();
 });
 
+// === Nota de retiro ===
+// Sus elementos son solo una descripción cada uno y viven en su propio
+// contenedor, así cambiar de documento no pisa lo cargado en el otro.
+const retiroContainer = document.getElementById('retiro-container');
+
+function crearElementoRetiro() {
+  const fila = document.createElement('div');
+  fila.className = 'elemento-row elemento-row--simple';
+  fila.innerHTML = `
+    <span class="elemento-numero" aria-hidden="true"></span>
+    <input type="text" class="elemento-descripcion" placeholder="Ej. Impresora marca Pantum modelo M6550NW nro. de serie CJ3X001670" aria-label="Descripción del elemento" required>
+    <div class="elemento-acciones">
+      <button type="button" class="icon-btn icon-btn--danger quitar-elemento" aria-label="Quitar elemento" title="Quitar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+      </button>
+    </div>
+  `;
+  // La nota exige al menos un elemento: la última fila no se puede quitar.
+  fila.querySelector('.quitar-elemento').addEventListener('click', () => {
+    if (retiroContainer.children.length > 1) fila.remove();
+  });
+  retiroContainer.appendChild(fila);
+  return fila;
+}
+
+function agregarElementoRetiro() {
+  crearElementoRetiro().querySelector('input').focus();
+}
+
+// actualizarDocumento adapta la pantalla al documento elegido: muestra solo
+// las secciones .solo-acta o .solo-retiro y deshabilita los fieldsets
+// ocultos (un fieldset disabled no se valida ni se envía), actualiza
+// títulos, botón y resumen, y para las actas aplica las reglas por tipo.
+const tituloDoc = document.getElementById('doc-titulo');
+const descDoc = document.getElementById('doc-desc');
+const resumenDoc = document.getElementById('resumen-doc');
+const resumenItems = document.getElementById('resumen-items');
+
+function actualizarDocumento() {
+  const retiro = esRetiro();
+  document.querySelectorAll('.solo-acta, .solo-retiro').forEach((el) => {
+    const oculto = el.classList.contains('solo-acta') ? retiro : !retiro;
+    el.hidden = oculto;
+    if (el.tagName === 'FIELDSET') el.disabled = oculto;
+  });
+
+  const opcion = docPicker.querySelector('input:checked');
+  tituloDoc.textContent = opcion.dataset.titulo;
+  descDoc.textContent = opcion.dataset.desc;
+  resumenDoc.textContent = opcion.nextElementSibling.textContent;
+  if (!generandoEnCurso) botonGenerar.textContent = textoBoton();
+
+  // Permite volver al mismo documento con un link (ej. index.html#retiro).
+  history.replaceState(null, '', `#${documentoActual()}`);
+
+  if (!retiro) actualizarCamposPorTipo();
+  actualizarResumen();
+}
+
+function actualizarResumen() {
+  const n = (esRetiro() ? retiroContainer : elementosContainer).querySelectorAll('.elemento-row').length;
+  resumenItems.textContent = `${n} ${n === 1 ? 'elemento' : 'elementos'}`;
+}
+
+new MutationObserver(actualizarResumen).observe(elementosContainer, { childList: true });
+new MutationObserver(actualizarResumen).observe(retiroContainer, { childList: true });
+
+const textoBoton = () => (esRetiro() ? 'Generar Nota' : 'Generar Acta');
+
 crearFilaElemento();
-actualizarCamposPorTipo();
+crearElementoRetiro();
 
 function leerElementos() {
   return Array.from(elementosContainer.querySelectorAll('.elemento-row')).map((fila) => ({
@@ -264,13 +367,15 @@ function leerElementos() {
 }
 
 // mostrarToast crea una notificación flotante en la esquina superior
-// derecha, con fade-in/translateY de entrada, y la retira sola a los 3s.
+// derecha, con fade-in/translateY de entrada, y la retira sola a los 5s
+// (tiempo para alcanzar a usar el link de descarga).
 // Si se pasa enlaceDescarga, agrega un link breve dentro del toast: sirve
 // de respaldo si el navegador bloqueó la descarga automática (no hay forma
 // confiable de detectar el bloqueo, así que siempre se ofrece).
 function mostrarToast(mensaje, tipo, enlaceDescarga) {
   const toast = document.createElement('div');
   toast.className = `toast toast-${tipo}`;
+  toast.setAttribute('role', tipo === 'error' ? 'alert' : 'status');
   toast.textContent = mensaje;
 
   if (enlaceDescarga) {
@@ -291,12 +396,25 @@ function mostrarToast(mensaje, tipo, enlaceDescarga) {
   setTimeout(() => {
     toast.classList.remove('toast-visible');
     toast.addEventListener('transitionend', () => toast.remove(), { once: true });
-  }, 3000);
+  }, 5000);
 }
 
 const botonGenerar = form.querySelector('button[type="submit"]');
-const textoOriginalBoton = botonGenerar.textContent;
 let generandoEnCurso = false;
+
+// Documento inicial: el del hash si es válido (ej. #retiro), si no "acta".
+const opcionDelHash = Array.from(form.elements.documento).find((r) => r.value === location.hash.slice(1));
+if (opcionDelHash) opcionDelHash.checked = true;
+actualizarDocumento();
+
+// leerNotaRetiro arma el cuerpo que espera /api/notas-retiro/generar.
+function leerNotaRetiro(fecha) {
+  return {
+    fecha,
+    empresa: document.getElementById('empresa').value,
+    elementos: Array.from(retiroContainer.querySelectorAll('.elemento-descripcion')).map((i) => i.value),
+  };
+}
 
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
@@ -317,24 +435,30 @@ form.addEventListener('submit', async (event) => {
     ? campoAreaDepartamentoOtra.value
     : selectAreaDepartamento.value;
 
-  const acta = {
+  const retiro = esRetiro();
+  const url = retiro ? '/api/notas-retiro/generar' : '/api/actas/generar';
+  const cuerpo = retiro ? leerNotaRetiro(fecha) : {
     fecha,
     quienEntrega: document.getElementById('quienEntrega').value,
-    quienRecibe: document.getElementById('quienRecibe').value,
-    tipo: document.getElementById('tipo').value,
+    // El backend sigue exigiendo quienRecibe en recibimiento/ambos; ahora
+    // ese dato es el área, así que se manda su valor (vacío en entrega,
+    // como antes cuando el campo estaba oculto).
+    quienRecibe: tipoActual() === 'entrega' ? '' : areaDepartamento,
+    tipo: tipoActual(),
     areaDepartamento,
     elementos: leerElementos(),
   };
 
   generandoEnCurso = true;
   botonGenerar.disabled = true;
-  botonGenerar.innerHTML = '<span class="spinner"></span> Generando PDF...';
+  botonGenerar.innerHTML = '<span class="spinner" aria-hidden="true"></span> Generando PDF...';
+  form.setAttribute('aria-busy', 'true');
 
   try {
-    const respuesta = await fetch('/api/actas/generar', {
+    const respuesta = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(acta),
+      body: JSON.stringify(cuerpo),
     });
     const datos = await respuesta.json();
 
@@ -355,6 +479,7 @@ form.addEventListener('submit', async (event) => {
   } finally {
     generandoEnCurso = false;
     botonGenerar.disabled = false;
-    botonGenerar.textContent = textoOriginalBoton;
+    botonGenerar.textContent = textoBoton();
+    form.removeAttribute('aria-busy');
   }
 });

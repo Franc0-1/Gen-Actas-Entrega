@@ -1,64 +1,116 @@
+/* Estilo minimal y tranquilo sobre la misma estructura original: una sola
+   tarjeta centrada con secciones. Neutros fríos, azul como color de marca,
+   sombras muy suaves y espaciado amplio. Todo color sale de estas variables; el modo oscuro
+   solo las redefine. */
 :root {
-  --color-bg: #f3f4f6;
+  --color-bg: #f5f6f8;
   --color-card: #ffffff;
-  --color-border: #dde1e6;
-  --color-text: #1f2430;
-  --color-text-muted: #6b7280;
-  --color-primary: #2e7d32;
-  --color-primary-hover: #256628;
-  --color-danger: #c62828;
+  --color-subtle: #f8f9fa;
+  --color-border: #e6e8ec;
+  --color-input-border: #d6dae0;
+  --color-text: #111827;
+  --color-text-muted: #5f6672;
+  --color-primary: #1d4ed8;
+  --color-primary-hover: #1e40af;
+  --color-on-primary: #ffffff;
+  --color-primary-ink: #1d4ed8;
+  --color-primary-soft: #eff6ff;
+  --color-danger: #dc2626;
+  --color-danger-soft: #fef2f2;
   --color-input-bg: #ffffff;
-  --color-row-hover: #f8f9fa;
-  --color-focus-ring: rgba(46, 125, 50, 0.15);
-  --radius: 8px;
+  --color-focus-ring: rgba(29, 78, 216, 0.18);
+  --shadow-card: 0 1px 2px rgba(17, 24, 39, 0.04), 0 12px 32px rgba(17, 24, 39, 0.05);
+  --shadow-chip: 0 1px 2px rgba(17, 24, 39, 0.08);
+  --radius: 10px;
+  --radius-lg: 16px;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --font: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 /* Modo oscuro: redefine las mismas variables, así que todo lo que ya usa
    var(--color-*) se actualiza solo, sin reglas duplicadas por elemento. */
 body.dark-theme {
-  --color-bg: #16181c;
-  --color-card: #1e2126;
-  --color-border: #363b42;
-  --color-text: #e7e9ec;
-  --color-text-muted: #9aa1ab;
-  --color-primary: #4caf50;
-  --color-primary-hover: #5cbf60;
-  --color-danger: #ef5350;
-  --color-input-bg: #262a30;
-  --color-row-hover: #262a30;
-  --color-focus-ring: rgba(76, 175, 80, 0.25);
+  --color-bg: #0f1115;
+  --color-card: #171a20;
+  --color-subtle: #1c2027;
+  --color-border: #262a33;
+  --color-input-border: #343a45;
+  --color-text: #e8eaed;
+  --color-text-muted: #9aa1ac;
+  --color-primary: #60a5fa;
+  --color-primary-hover: #93c5fd;
+  --color-on-primary: #0b1b3a;
+  --color-primary-ink: #93c5fd;
+  --color-primary-soft: rgba(96, 165, 250, 0.12);
+  --color-danger: #f87171;
+  --color-danger-soft: rgba(248, 113, 113, 0.12);
+  --color-input-bg: #1d2129;
+  --color-focus-ring: rgba(96, 165, 250, 0.25);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px rgba(0, 0, 0, 0.2);
+  --shadow-chip: 0 1px 2px rgba(0, 0, 0, 0.4);
+  color-scheme: dark;
 }
 
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
-body {
-  font-family: system-ui, sans-serif;
-  background: var(--color-bg);
-  color: var(--color-text);
-  margin: 0;
-  padding: 2.5rem 1rem;
-  transition: background-color 0.15s ease, color 0.15s ease;
-}
-
-/* Sin esto, "form label"/"form select"/"form input" (display: block, más
-   abajo) le ganan por origen al [hidden] por defecto del navegador y el
-   elemento igual queda visible aunque tenga el atributo hidden. */
+/* Sin esto, reglas con display (block/grid/contents) le ganan al [hidden]
+   por defecto del navegador y el elemento queda visible igual. */
 [hidden] {
   display: none !important;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+body {
+  margin: 0;
+  padding: 1.25rem 1rem;
+  font-family: var(--font);
+  line-height: 1.5;
+  background: var(--color-bg);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+button {
+  cursor: pointer;
+  font: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* === Tarjeta === */
 
 .card {
-  max-width: 780px;
+  max-width: 880px;
   margin: 0 auto;
+  padding: 1.5rem 2rem;
   background: var(--color-card);
   border: 1px solid var(--color-border);
-  border-radius: 12px;
-  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 8px 24px rgba(16, 24, 40, 0.06);
-  padding: 2rem;
-  transition: background-color 0.15s ease, border-color 0.15s ease;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .card-header {
@@ -66,6 +118,21 @@ body {
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+h1 {
+  margin: 0 0 0.375rem;
+  font-size: 1.5rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.925rem;
 }
 
 .theme-toggle {
@@ -77,48 +144,93 @@ body {
   height: 2.5rem;
   border: 1px solid var(--color-border);
   border-radius: 999px;
-  background: var(--color-input-bg);
-  color: var(--color-text);
-  font-size: 1.1rem;
-  line-height: 1;
-  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+  background: var(--color-card);
+  color: var(--color-text-muted);
+  transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
 }
 
 .theme-toggle:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
+  background: var(--color-subtle);
+  color: var(--color-text);
 }
 
-.theme-toggle:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+.theme-toggle svg {
+  width: 1.125rem;
+  height: 1.125rem;
 }
 
-@media (max-width: 480px) {
-  body {
-    padding: 1.25rem 0.75rem;
-  }
-
-  .card {
-    padding: 1.25rem;
-  }
+.icono-sol,
+body.dark-theme .icono-luna {
+  display: none;
 }
 
-h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0 0 0.35rem;
+body.dark-theme .icono-sol {
+  display: block;
 }
 
-.subtitle {
-  margin: 0 0 1.75rem;
+/* === Selector de documento (radios con aspecto de control segmentado) === */
+
+.segmented {
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 0.25rem;
+  margin-bottom: 1.25rem;
+  padding: 0.25rem;
+  border-radius: 999px;
+  background: var(--color-subtle);
+  border: 1px solid var(--color-border);
+}
+
+.segmented-opcion {
+  position: relative;
+}
+
+.segmented-opcion input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.segmented-opcion span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.125rem;
+  padding: 0 1.25rem;
+  border-radius: 999px;
   color: var(--color-text-muted);
   font-size: 0.9rem;
+  font-weight: 550;
+  white-space: nowrap;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
 
+.segmented-opcion:hover span {
+  color: var(--color-text);
+}
+
+.segmented-opcion input:checked + span {
+  background: var(--color-card);
+  color: var(--color-primary-ink);
+  font-weight: 600;
+  box-shadow: var(--shadow-chip);
+}
+
+.segmented-opcion input:focus-visible + span {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+/* === Secciones === */
+
 .form-section {
-  padding-bottom: 1.75rem;
-  margin-bottom: 1.75rem;
+  padding-bottom: 1.125rem;
+  margin-bottom: 1.125rem;
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -129,12 +241,12 @@ h1 {
 }
 
 .form-section h2 {
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  margin: 0 0 0.75rem;
   color: var(--color-text-muted);
-  margin: 0 0 1rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .form-grid {
@@ -143,17 +255,41 @@ h1 {
   gap: 1rem;
 }
 
-@media (min-width: 560px) {
+@media (min-width: 600px) {
   .form-grid {
     grid-template-columns: 1fr 1fr;
   }
 }
 
+/* Datos generales en una sola fila (Fecha | Tipo | Área) para que el
+   formulario entre en pantalla sin scroll. En la nota, Empresa ocupa el
+   espacio de Tipo y Área. */
+@media (min-width: 760px) {
+  .form-grid--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .form-grid--3 .solo-retiro label {
+    grid-column: span 2;
+  }
+}
+
+/* Estos fieldsets solo agrupan para habilitar/deshabilitar; sus labels se
+   acomodan en la grilla como si fueran hijos directos de .form-grid. */
+.form-grid-contents {
+  display: contents;
+}
+
+.form-grid-full {
+  grid-column: 1 / -1;
+}
+
+/* === Campos === */
+
 form label {
   display: block;
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin-bottom: 0;
+  font-size: 0.875rem;
+  font-weight: 550;
 }
 
 form input,
@@ -161,174 +297,328 @@ form select {
   display: block;
   width: 100%;
   height: 2.5rem;
-  padding: 0 0.75rem;
-  margin-top: 0.35rem;
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  font: inherit;
-  font-size: 0.9rem;
-  color: var(--color-text);
+  margin-top: 0.3rem;
+  padding: 0 0.875rem;
+  border: 1px solid var(--color-input-border);
+  border-radius: var(--radius);
   background: var(--color-input-bg);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 400;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+form input::placeholder {
+  color: var(--color-text-muted);
+  opacity: 0.7;
 }
 
 form input:hover,
 form select:hover {
-  border-color: #b7bcc4;
+  border-color: var(--color-text-muted);
 }
 
 form input:focus,
 form select:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--color-focus-ring);
+  box-shadow: 0 0 0 4px var(--color-focus-ring);
 }
 
-/* Sin esto, el autocompletado del navegador (ej. Chrome recordando lo
-   tipeado en "Especificar área/departamento") fuerza fondo blanco y texto
+/* Error junto al campo, solo después de que el usuario interactuó con él
+   o intentó enviar, para no marcar todo en rojo al cargar. */
+form input:user-invalid,
+form select:user-invalid {
+  border-color: var(--color-danger);
+}
+
+form input:user-invalid:focus,
+form select:user-invalid:focus {
+  box-shadow: 0 0 0 4px var(--color-danger-soft);
+}
+
+/* Sin esto, el autocompletado del navegador fuerza fondo blanco y texto
    oscuro con sus propios estilos internos, ignorando el tema activo. */
 form input:-webkit-autofill,
 form input:-webkit-autofill:hover,
 form input:-webkit-autofill:focus {
-  border-color: var(--color-border);
   -webkit-text-fill-color: var(--color-text);
   caret-color: var(--color-text);
   -webkit-box-shadow: 0 0 0 1000px var(--color-input-bg) inset;
   box-shadow: 0 0 0 1000px var(--color-input-bg) inset;
-  transition: background-color 5000s ease-in-out 0s, border-color 0.15s ease, color 0.15s ease;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
-.elementos-list {
-  overflow-x: auto;
-  margin-bottom: 0.75rem;
-  -webkit-overflow-scrolling: touch;
+/* === Elementos === */
+
+.form-section:has(#elementos-container) {
+  container-type: inline-size;
 }
 
-.elementos-header,
 .elemento-row {
-  display: grid;
-  /* 1: Descripción | 2: Nro.Inven | 3: Cantidad | 4: Observación | 5: Botones.
-     La columna de botones tiene un ancho fijo (en vez de auto) porque
-     .elementos-header y .elemento-row son grids independientes: con auto,
-     cada una calcula ese ancho según su propio contenido (la cabecera no
-     tiene botones), y las columnas quedaban desalineadas entre sí. */
-  grid-template-columns: 2fr 1.2fr 0.8fr 2fr 9.5rem;
-  gap: 0.5rem;
-  align-items: center;
-  min-width: 680px;
+  animation: aparecer 0.2s var(--ease);
 }
 
-.elementos-header {
-  padding: 0 0 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+/* La numeración de filas no forma parte del diseño original. */
+.elemento-numero {
+  display: none;
+}
+
+.campo {
+  display: block;
+  min-width: 0;
+  font-weight: 500;
+}
+
+.campo-label {
+  display: block;
   color: var(--color-text-muted);
-  border-bottom: 1px solid var(--color-border);
-  margin-bottom: 0.5rem;
+  font-size: 0.8rem;
 }
 
-.elemento-row {
-  padding: 0.5rem 0;
-  margin-bottom: 0;
-  border-bottom: 1px solid var(--color-border);
-  transition: background-color 0.15s ease;
-}
-
-
-body.modo-ambos .elementos-header,
-body.modo-ambos .elemento-row {
-  /* Se inserta la columna de Dirección entre Cantidad y Observación. Mismo
-     ancho fijo para la columna de botones que en la regla base, por la
-     misma razón (ver comentario más arriba). */
-  grid-template-columns: 2fr 1.2fr 0.8fr 1.2fr 2fr 9.5rem;
-}
-
-.elemento-row:last-child {
-  border-bottom: none;
-}
-
-.elemento-row:hover {
-  background-color: var(--color-row-hover);
-}
-
-.elemento-row input,
-.elemento-row select,
-.elemento-row button {
-  width: 100%;
-  height: 2.25rem;
-  margin-top: 0;
+.campo input,
+.campo select {
+  margin-top: 0.3rem;
 }
 
 .elemento-acciones {
   display: flex;
-  gap: 0.375rem;
-  white-space: nowrap;
+  justify-content: flex-end;
+  gap: 0.25rem;
 }
 
-.elemento-acciones button {
-  width: auto;
-  padding: 0 0.6rem;
-}
-
-.duplicar-elemento,
-.quitar-elemento {
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  background: var(--color-input-bg);
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
   color: var(--color-text-muted);
-  font-size: 0.8rem;
-  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.duplicar-elemento:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
+.icon-btn svg {
+  width: 1.125rem;
+  height: 1.125rem;
 }
 
-.duplicar-elemento:focus-visible,
-.quitar-elemento:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+.icon-btn:hover {
+  background: var(--color-primary-soft);
+  color: var(--color-primary-ink);
 }
 
-button {
-  cursor: pointer;
-  font: inherit;
+.icon-btn--danger:hover {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
 }
+
+/* Angosto: cada elemento del acta es un bloque suave con sus labels
+   visibles; sin scroll horizontal. */
+.items-head {
+  display: none;
+}
+
+.elemento-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-areas:
+    "desc desc"
+    "inv cant"
+    "dir dir"
+    "obs obs"
+    "acc acc";
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-subtle);
+}
+
+/* Sin columna Dirección (tipo distinto de "ambos") se saca su fila. */
+body:not(.modo-ambos) .elemento-row {
+  grid-template-areas:
+    "desc desc"
+    "inv cant"
+    "obs obs"
+    "acc acc";
+}
+
+.elemento-row .elemento-acciones { grid-area: acc; }
+.elemento-row .campo--descripcion { grid-area: desc; }
+.elemento-row .campo:has(.elemento-nroInventario) { grid-area: inv; }
+.elemento-row .campo:has(.elemento-cantidad) { grid-area: cant; }
+.elemento-row .campo:has(.elemento-direccion) { grid-area: dir; }
+.elemento-row .campo--observacion { grid-area: obs; }
+
+/* Ancho suficiente: tabla compacta con cabecera, como el diseño original;
+   los labels de cada fila quedan solo para lectores de pantalla. */
+@container (min-width: 680px) {
+  .items-head,
+  .elemento-row {
+    display: grid;
+    /* Descripción | Nro. Inv | Cantidad | Observación | Botones. La columna
+       de botones tiene ancho fijo: cabecera y filas son grids separados y
+       con auto quedarían desalineados. */
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1.1fr) minmax(0, 0.8fr) minmax(0, 2fr) 5.25rem;
+    grid-template-areas: none;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  body.modo-ambos .items-head,
+  body.modo-ambos .elemento-row {
+    /* Se inserta la columna de Dirección entre Cantidad y Observación. */
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1.1fr) minmax(0, 0.8fr) minmax(0, 1.1fr) minmax(0, 2fr) 5.25rem;
+  }
+
+  .elemento-row > * {
+    grid-area: auto !important;
+  }
+
+  .items-head {
+    padding: 0 0.25rem 0.625rem;
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .elemento-row {
+    margin: 0;
+    padding: 0.375rem 0.25rem;
+    border: 0;
+    border-top: 1px solid var(--color-border);
+    border-radius: 0;
+    background: transparent;
+    transition: background-color 0.2s ease;
+  }
+
+  .elemento-row:hover,
+  .elemento-row:focus-within {
+    background: var(--color-subtle);
+  }
+
+  .elemento-row input,
+  .elemento-row select {
+    height: 2.5rem;
+    margin-top: 0;
+  }
+
+  .elemento-row .campo-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+
+/* Fila de la nota de retiro: solo descripción + quitar, en todo ancho. Se
+   selecciona por id para ganarle a las reglas de la tabla del acta (ej.
+   body.modo-ambos .elemento-row), que comparten la clase .elemento-row. */
+#retiro-container .elemento-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: none;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+/* En pantallas anchas el campo ocupa la mitad y el botón de quitar queda
+   pegado a su derecha; en celular sigue a todo el ancho. */
+@media (min-width: 600px) {
+  #retiro-container .elemento-row {
+    grid-template-columns: minmax(0, 50%) auto;
+    justify-content: start;
+  }
+}
+
+.elemento-row--simple > * {
+  grid-area: auto !important;
+}
+
+.elemento-row--simple input {
+  margin-top: 0;
+}
+
+/* === Botones === */
 
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.5rem;
   height: 2.5rem;
   padding: 0 1.25rem;
   border: 1px solid transparent;
-  border-radius: 6px;
-  font-size: 0.9rem;
+  border-radius: var(--radius);
+  font-size: 0.925rem;
   font-weight: 600;
-  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.05s ease;
+  white-space: nowrap;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.1s ease;
 }
 
-.btn:active {
-  transform: translateY(1px);
+.btn svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.98);
 }
 
 .btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
+  opacity: 0.7;
+  cursor: progress;
+}
+
+.btn-primary {
+  min-width: 11rem;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.btn-secondary {
+  margin-top: 0.75rem;
+  background: var(--color-card);
+  border-color: var(--color-input-border);
+  color: var(--color-text);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary-ink);
+  background: var(--color-primary-soft);
 }
 
 .spinner {
   display: inline-block;
-  width: 0.85rem;
-  height: 0.85rem;
-  margin-right: 0.5rem;
-  vertical-align: middle;
-  border: 2px solid rgba(255, 255, 255, 0.4);
-  border-top-color: #fff;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
   border-radius: 50%;
   animation: girar 0.6s linear infinite;
 }
@@ -339,52 +629,56 @@ button {
   }
 }
 
-.btn-primary {
-  background: var(--color-primary);
-  color: #fff;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: var(--color-primary-hover);
-}
-
-.btn-secondary {
-  background: var(--color-input-bg);
-  border-color: var(--color-border);
-  color: var(--color-text);
-}
-
-.btn-secondary:hover:not(:disabled) {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-}
-
-.quitar-elemento:hover {
-  border-color: var(--color-danger);
-  color: var(--color-danger);
-}
-
 .acciones-form {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  justify-content: space-between;
+  gap: 1rem;
   flex-wrap: wrap;
+}
+
+.summary {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+#resumen-doc {
+  color: var(--color-text);
+  font-weight: 600;
 }
 
 /* === Toast === */
 
 .toast {
   position: fixed;
-  top: 1rem;
-  right: 1rem;
-  padding: 0.75rem 1.25rem;
-  border-radius: 4px;
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  opacity: 0;
-  transform: translateY(-12px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  top: 1.25rem;
+  right: 1.25rem;
   z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: min(26rem, calc(100vw - 2.5rem));
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-card);
+  color: var(--color-text);
+  font-size: 0.925rem;
+  box-shadow: var(--shadow-card);
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
+}
+
+/* Punto de color como indicador de estado, sin depender solo del color:
+   el texto del mensaje ya dice si fue éxito o error. */
+.toast::before {
+  content: "";
+  flex-shrink: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
 }
 
 .toast-visible {
@@ -392,24 +686,58 @@ button {
   transform: translateY(0);
 }
 
-.toast-exito {
+.toast-exito::before {
   background: var(--color-primary);
 }
 
-.toast-error {
+.toast-error::before {
   background: var(--color-danger);
 }
 
 .toast-link {
-  display: inline-block;
-  margin-left: 0.75rem;
-  color: #fff;
-  text-decoration: underline;
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--color-primary-ink);
   font-weight: 600;
 }
 
-/* Fila de la nota de retiro: solo descripción + botón quitar. */
-.elemento-row.elemento-row--simple {
-  grid-template-columns: 1fr auto;
-  min-width: 0;
+/* === Pantallas chicas === */
+
+@media (max-width: 560px) {
+  body {
+    padding: 1rem 0.75rem;
+  }
+
+  .card {
+    padding: 1.25rem;
+    border-radius: 12px;
+  }
+
+  .segmented {
+    display: grid;
+    width: 100%;
+  }
+
+  .segmented-opcion span {
+    padding: 0 0.5rem;
+  }
+
+  .acciones-form .btn-primary {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .spinner {
+    animation-duration: 1.2s !important;
+    animation-iteration-count: infinite !important;
+  }
 }

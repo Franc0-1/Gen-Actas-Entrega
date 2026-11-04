@@ -10,32 +10,78 @@
   <div class="card">
     <div class="card-header">
       <div>
-        <h1>Generar actas de entrega</h1>
-        <p class="subtitle">Completá los datos para generar el acta en PDF, lista para descargar. <a href="retiro.html">Nota de retiro</a></p>
+        <h1 id="doc-titulo">Generar actas de entrega</h1>
+        <p class="subtitle" id="doc-desc">Completá los datos para generar el acta en PDF, lista para descargar.</p>
       </div>
-      <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Cambiar a modo oscuro">🌙</button>
+      <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Cambiar a modo oscuro">
+        <svg class="icono-luna" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icono-sol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
     </div>
 
-    <form id="acta-form">
+    <form id="doc-form">
+      <!-- Documento a generar: la nota de retiro vive en el mismo formulario.
+           Al cambiarlo se muestran solo las secciones .solo-acta o
+           .solo-retiro (ver actualizarDocumento en app.js). -->
+      <fieldset class="segmented" id="doc-picker">
+        <legend class="sr-only">Documento a generar</legend>
+        <label class="segmented-opcion">
+          <input type="radio" name="documento" value="acta" checked
+                 data-titulo="Generar actas de entrega" data-desc="Completá los datos para generar el acta en PDF, lista para descargar.">
+          <span>Acta de entrega</span>
+        </label>
+        <label class="segmented-opcion">
+          <input type="radio" name="documento" value="retiro"
+                 data-titulo="Generar nota de retiro" data-desc="Nota a la Guardia Policial de Casa de Gobierno, en PDF.">
+          <span>Nota de retiro</span>
+        </label>
+      </fieldset>
+
       <section class="form-section">
-        <h2>Datos del acta</h2>
-        <div class="form-grid">
+        <h2 class="solo-acta">Datos del acta</h2>
+        <h2 class="solo-retiro" hidden>Datos de la nota</h2>
+        <div class="form-grid form-grid--3">
           <label>
             Fecha
             <input type="date" id="fecha" required>
           </label>
 
+          <!-- Los fieldsets ocultos se deshabilitan: así el navegador no
+               valida ni envía sus campos. -->
+          <fieldset class="form-grid-contents solo-acta">
+            <label>
+              Tipo de acta
+              <select id="tipo">
+                <option value="entrega">Entrega</option>
+                <option value="recibimiento">Recibimiento</option>
+                <option value="ambos">Ambos</option>
+              </select>
+            </label>
+
+          </fieldset>
+
+          <fieldset class="form-grid-contents solo-retiro" hidden disabled>
+            <label>
+              Empresa que retira
+              <input type="text" id="empresa" placeholder="Ej. Bienes y Servicios 3M" required>
+            </label>
+          </fieldset>
+        </div>
+      </section>
+
+      <section class="form-section solo-acta">
+        <h2>Participantes</h2>
+        <fieldset class="form-grid solo-acta">
           <label>
-            Tipo de acta
-            <select id="tipo">
-              <option value="entrega">Entrega</option>
-              <option value="recibimiento">Recibimiento</option>
-              <option value="ambos">Ambos</option>
-            </select>
+            Quien presenta
+            <input type="text" id="quienEntrega" value="Oficina de Sistemas" required>
           </label>
 
+          <!-- Reemplaza al antiguo "Quién recibe": el área es lo que figura en
+               el acta. El texto del label cambia según el tipo (ver
+               actualizarCamposPorTipo en app.js). -->
           <label>
-            Área/Departamento
+            <span id="areaDepartamentoTexto">Área/Departamento que recibe</span>
             <select id="areaDepartamento" required>
               <option value="" selected disabled>Seleccionar...</option>
               <option value="Prensa">Prensa</option>
@@ -47,47 +93,47 @@
             </select>
           </label>
 
-          <label id="areaDepartamentoOtraLabel" hidden>
+          <label id="areaDepartamentoOtraLabel" class="form-grid-full" hidden>
             Especificar área/departamento
             <input type="text" id="areaDepartamentoOtra">
           </label>
-        </div>
+        </fieldset>
       </section>
 
       <section class="form-section">
-        <h2>Participantes</h2>
-        <div class="form-grid">
-          <label>
-            Quien presenta
-            <input type="text" id="quienEntrega" value="Oficina de Sistemas" required>
-          </label>
+        <h2 class="solo-acta">Elementos</h2>
+        <h2 class="solo-retiro" hidden>Elementos a retirar</h2>
 
-          <label>
-            Quién recibe
-            <input type="text" id="quienRecibe" required>
-          </label>
-        </div>
-      </section>
-
-      <section class="form-section">
-        <h2>Elementos</h2>
-        <div class="elementos-list">
-        <div class="elementos-header" aria-hidden="true">
+        <fieldset class="solo-acta">
+          <div class="elementos-list">
+            <div class="items-head" aria-hidden="true">
               <span>Descripción</span>
               <span>Nro. Inv</span>
               <span>Cantidad</span>
               <span class="col-direccion">Dirección</span>
               <span>Observación</span>
-              <span></span> 
+              <span></span>
             </div>
-          <div id="elementos-container"></div>
-        </div>
-        <button type="button" id="agregar-elemento" class="btn btn-secondary">+ Agregar elemento</button>
+            <div id="elementos-container"></div>
+          </div>
+        </fieldset>
+
+        <fieldset class="solo-retiro" hidden disabled>
+          <div id="retiro-container"></div>
+        </fieldset>
+
+        <button type="button" id="agregar-elemento" class="btn btn-secondary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          Agregar elemento
+        </button>
       </section>
 
       <section class="form-section form-section--acciones">
         <div class="acciones-form">
-          <button type="submit" class="btn btn-primary">Generar Acta</button>
+          <p class="summary" aria-live="polite">
+            <span id="resumen-doc">Acta de entrega</span> · <span id="resumen-items">1 elemento</span>
+          </p>
+          <button type="submit" class="btn btn-primary" id="boton-generar">Generar Acta</button>
         </div>
       </section>
     </form>
