@@ -440,10 +440,6 @@ form.addEventListener('submit', async (event) => {
   const cuerpo = retiro ? leerNotaRetiro(fecha) : {
     fecha,
     quienEntrega: document.getElementById('quienEntrega').value,
-    // El backend sigue exigiendo quienRecibe en recibimiento/ambos; ahora
-    // ese dato es el área, así que se manda su valor (vacío en entrega,
-    // como antes cuando el campo estaba oculto).
-    quienRecibe: tipoActual() === 'entrega' ? '' : areaDepartamento,
     tipo: tipoActual(),
     areaDepartamento,
     elementos: leerElementos(),

@@ -7,7 +7,6 @@
 # --- Documentos generados por la aplicación (y por los tests) ---
 # Las plantillas viven en templates/docx/ y SÍ se versionan.
 /output/*
-!/output/.gitkeep
 
 # --- Binarios de Go ---
 *.exe

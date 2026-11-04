@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"actas-project/internal/handlers"
+	"actas-project/internal/services"
 )
 
 // loadEnv lee un archivo .env simple (KEY=VALUE por línea) y setea
@@ -43,8 +44,26 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(`{"status":"ok"}`))
 }
 
+// sinListado responde 404 a cualquier ruta de carpeta (terminada en "/"),
+// para que http.FileServer no publique el listado de documentos generados;
+// los archivos se siguen sirviendo por su ruta exacta. Una carpeta pedida
+// sin "/" final la redirige FileServer a la versión con "/", que cae acá.
+func sinListado(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.URL.Path, "/") {
+			http.NotFound(w, r)
+			return
+		}
+		h.ServeHTTP(w, r)
+	})
+}
+
 func main() {
 	loadEnv(".env")
+
+	if err := services.PrepararDirectorios(); err != nil {
+		log.Fatal(err)
+	}
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -56,7 +75,7 @@ func main() {
 	mux.HandleFunc("/api/actas/generar", handlers.GenerarActaHandler)
 	mux.HandleFunc("/api/notas-retiro/generar", handlers.GenerarNotaRetiroHandler)
 	mux.Handle("/", http.FileServer(http.Dir("templates/web")))
-	mux.Handle("/output/", http.StripPrefix("/output/", http.FileServer(http.Dir("output"))))
+	mux.Handle("/output/", sinListado(http.StripPrefix("/output/", http.FileServer(http.Dir("output")))))
 
 	addr := ":" + port
 	log.Printf("Servidor escuchando en http://localhost%s", addr)

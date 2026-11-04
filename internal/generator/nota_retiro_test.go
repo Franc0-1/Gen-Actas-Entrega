@@ -1,6 +1,7 @@
 package generator
 
 import (
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -14,7 +15,7 @@ func TestGenerateNotaRetiro(t *testing.T) {
 		Empresa:   "Bienes & Servicios 3M",
 		Elementos: []string{"Impresora marca Pantum modelo M6550NW nro. de serie CJ3X001670", "Monitor Samsung."},
 	}
-	outputPath := "../../output/nota_retiro_prueba.docx"
+	outputPath := filepath.Join(t.TempDir(), "nota_retiro_prueba.docx")
 	if err := GenerateNotaRetiro(nota, "../../templates/docx/plantilla_retiro.docx", outputPath); err != nil {
 		t.Fatalf("no se pudo generar la nota: %v", err)
 	}

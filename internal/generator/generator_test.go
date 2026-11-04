@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/xml"
 	"io"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -18,7 +19,6 @@ func actaDePrueba() models.Acta {
 	return models.Acta{
 		Fecha:            time.Date(2026, time.August, 31, 0, 0, 0, 0, time.UTC),
 		QuienEntrega:     "Juan Pérez",
-		QuienRecibe:      "María Gómez",
 		Tipo:             models.TipoActaAmbos,
 		AreaDepartamento: "Dirección de Sistemas",
 		Elementos: []models.Elemento{
@@ -92,7 +92,7 @@ func extraerTexto(t *testing.T, docXML []byte) string {
 
 func TestGenerate_ActaAmbos(t *testing.T) {
 	acta := actaDePrueba()
-	outputPath := "../../output/acta_prueba_ambos.docx"
+	outputPath := filepath.Join(t.TempDir(), "acta_prueba_ambos.docx")
 
 	if err := Generate(acta, plantillaPrueba, outputPath); err != nil {
 		t.Fatalf("Generate devolvió error: %v", err)
@@ -217,24 +217,23 @@ func TestGenerate_ActaAmbos(t *testing.T) {
 	}
 }
 
-// TestGenerate_ActaSoloEntrega verifica que la validación condicional por
-// tipo (QuienRecibe no obligatorio en una acta de tipo "entrega") no rompa
-// el flujo completo de generación del DOCX, no solo Acta.Validate().
+// TestGenerate_ActaSoloEntrega verifica que una acta de tipo "entrega" (solo
+// elementos que retira el área) pase por el flujo completo de generación del
+// DOCX, no solo Acta.Validate().
 func TestGenerate_ActaSoloEntrega(t *testing.T) {
 	acta := models.Acta{
 		Fecha:            time.Date(2026, time.August, 31, 0, 0, 0, 0, time.UTC),
 		QuienEntrega:     "Juan Pérez",
-		QuienRecibe:      "",
 		Tipo:             models.TipoActaEntrega,
 		AreaDepartamento: "Dirección de Sistemas",
 		Elementos: []models.Elemento{
 			{Descripcion: "Notebook Dell Latitude", NroInventario: "1001", Cantidad: 1, Direccion: models.DireccionRetira},
 		},
 	}
-	outputPath := "../../output/acta_prueba_solo_entrega.docx"
+	outputPath := filepath.Join(t.TempDir(), "acta_prueba_solo_entrega.docx")
 
 	if err := Generate(acta, plantillaPrueba, outputPath); err != nil {
-		t.Fatalf("Generate devolvió error con acta tipo entrega y QuienRecibe vacío: %v", err)
+		t.Fatalf("Generate devolvió error con acta tipo entrega: %v", err)
 	}
 
 	docXML := leerZip(t, outputPath)["word/document.xml"]

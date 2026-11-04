@@ -22,13 +22,13 @@ func elementoEntrega() Elemento {
 }
 
 func TestValidate_Entrega(t *testing.T) {
-	t.Run("válida sin QuienRecibe", func(t *testing.T) {
+	t.Run("válida con QuienEntrega y elemento retira", func(t *testing.T) {
 		acta := actaBase(TipoActaEntrega)
 		acta.QuienEntrega = "Juan Pérez"
 		acta.Elementos = []Elemento{elementoRetira()}
 
 		if err := acta.Validate(); err != nil {
-			t.Errorf("no debería exigir QuienRecibe en tipo entrega, error: %v", err)
+			t.Errorf("acta válida de tipo entrega no debería fallar, error: %v", err)
 		}
 	})
 
@@ -53,28 +53,17 @@ func TestValidate_Entrega(t *testing.T) {
 }
 
 func TestValidate_Recibimiento(t *testing.T) {
-	t.Run("válida sin QuienEntrega", func(t *testing.T) {
+	t.Run("válida solo con área, sin personas", func(t *testing.T) {
 		acta := actaBase(TipoActaRecibimiento)
-		acta.QuienRecibe = "María Gómez"
 		acta.Elementos = []Elemento{elementoEntrega()}
 
 		if err := acta.Validate(); err != nil {
-			t.Errorf("no debería exigir QuienEntrega en tipo recibimiento, error: %v", err)
-		}
-	})
-
-	t.Run("inválida sin QuienRecibe", func(t *testing.T) {
-		acta := actaBase(TipoActaRecibimiento)
-		acta.Elementos = []Elemento{elementoEntrega()}
-
-		if err := acta.Validate(); err == nil {
-			t.Error("debería exigir QuienRecibe en tipo recibimiento")
+			t.Errorf("recibimiento no debería exigir personas, solo el área, error: %v", err)
 		}
 	})
 
 	t.Run("inválida con elemento de dirección retira", func(t *testing.T) {
 		acta := actaBase(TipoActaRecibimiento)
-		acta.QuienRecibe = "María Gómez"
 		acta.Elementos = []Elemento{elementoRetira()}
 
 		if err := acta.Validate(); err == nil {
@@ -84,10 +73,9 @@ func TestValidate_Recibimiento(t *testing.T) {
 }
 
 func TestValidate_Ambos(t *testing.T) {
-	t.Run("válida con ambas personas y ambas direcciones", func(t *testing.T) {
+	t.Run("válida con QuienEntrega y ambas direcciones", func(t *testing.T) {
 		acta := actaBase(TipoActaAmbos)
 		acta.QuienEntrega = "Juan Pérez"
-		acta.QuienRecibe = "María Gómez"
 		acta.Elementos = []Elemento{elementoRetira(), elementoEntrega()}
 
 		if err := acta.Validate(); err != nil {
@@ -97,21 +85,10 @@ func TestValidate_Ambos(t *testing.T) {
 
 	t.Run("inválida sin QuienEntrega", func(t *testing.T) {
 		acta := actaBase(TipoActaAmbos)
-		acta.QuienRecibe = "María Gómez"
 		acta.Elementos = []Elemento{elementoRetira()}
 
 		if err := acta.Validate(); err == nil {
 			t.Error("debería exigir QuienEntrega en tipo ambos")
-		}
-	})
-
-	t.Run("inválida sin QuienRecibe", func(t *testing.T) {
-		acta := actaBase(TipoActaAmbos)
-		acta.QuienEntrega = "Juan Pérez"
-		acta.Elementos = []Elemento{elementoRetira()}
-
-		if err := acta.Validate(); err == nil {
-			t.Error("debería exigir QuienRecibe en tipo ambos")
 		}
 	})
 }
@@ -151,7 +128,6 @@ func TestValidate_CamposSiempreObligatorios(t *testing.T) {
 	t.Run("inválida con tipo desconocido", func(t *testing.T) {
 		acta := actaBase(TipoActa("otro"))
 		acta.QuienEntrega = "Juan Pérez"
-		acta.QuienRecibe = "María Gómez"
 		acta.Elementos = []Elemento{elementoRetira()}
 
 		if err := acta.Validate(); err == nil {

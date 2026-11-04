@@ -86,7 +86,6 @@ func esSoloDigitos(s string) bool {
 type Acta struct {
 	Fecha            time.Time  `json:"fecha"`
 	QuienEntrega     string     `json:"quienEntrega"`
-	QuienRecibe      string     `json:"quienRecibe"`
 	Tipo             TipoActa   `json:"tipo"`
 	AreaDepartamento string     `json:"areaDepartamento"`
 	Elementos        []Elemento `json:"elementos"`
@@ -119,24 +118,11 @@ func (a Acta) Validate() error {
 		return errors.New("la fecha del acta no puede ser futura")
 	}
 
-	// Quién entrega y quién recibe se exigen según el tipo de acta: una
-	// entrega pura no necesita quién recibe, y viceversa.
-	switch a.Tipo {
-	case TipoActaEntrega:
-		if a.QuienEntrega == "" {
-			return errors.New("el acta debe indicar quién entrega")
-		}
-	case TipoActaRecibimiento:
-		if a.QuienRecibe == "" {
-			return errors.New("el acta debe indicar quién recibe")
-		}
-	case TipoActaAmbos:
-		if a.QuienEntrega == "" {
-			return errors.New("el acta debe indicar quién entrega")
-		}
-		if a.QuienRecibe == "" {
-			return errors.New("el acta debe indicar quién recibe")
-		}
+	// Quién entrega solo se exige cuando la oficina entrega elementos
+	// (entrega o ambos). Del lado que recibe se identifica el área, que se
+	// valida abajo para todos los tipos.
+	if (a.Tipo == TipoActaEntrega || a.Tipo == TipoActaAmbos) && a.QuienEntrega == "" {
+		return errors.New("el acta debe indicar quién entrega")
 	}
 
 	if a.AreaDepartamento == "" {

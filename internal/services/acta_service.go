@@ -2,7 +2,6 @@ package services
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -15,20 +14,27 @@ import (
 const (
 	plantillaPath       = "templates/docx/plantilla_acta.docx"
 	plantillaRetiroPath = "templates/docx/plantilla_retiro.docx"
-	outputDir           = "output/Docx"
-	outputDirPDF        = "output/PDF"
 )
 
-// Los directorios de salida pueden no existir todavía en un contenedor
-// recién desplegado (ej. un bind mount de Docker cuyo lado del host está
-// vacío tapa lo que haya creado la imagen), así que se garantizan acá en
-// vez de asumir que ya están creados.
-func init() {
+// Variables (no constantes) para que los tests puedan apuntarlas a un
+// directorio temporal.
+var (
+	outputDir    = "output/Docx"
+	outputDirPDF = "output/PDF"
+)
+
+// PrepararDirectorios crea los directorios de salida si no existen. Pueden
+// faltar en un contenedor recién desplegado (ej. un bind mount de Docker
+// cuyo lado del host está vacío tapa lo que haya creado la imagen). Se llama
+// desde main al arrancar, no en un init(), para que importar el paquete
+// (ej. en tests) no cree carpetas.
+func PrepararDirectorios() error {
 	for _, dir := range []string{outputDir, outputDirPDF} {
 		if err := os.MkdirAll(dir, 0o755); err != nil {
-			log.Fatalf("no se pudo crear el directorio de salida %s: %v", dir, err)
+			return fmt.Errorf("no se pudo crear el directorio de salida %s: %w", dir, err)
 		}
 	}
+	return nil
 }
 
 // caracteresInvalidosArchivo son los caracteres que Windows (y, por
@@ -46,9 +52,8 @@ func sanitizarNombreArchivo(s string) string {
 	return strings.TrimSpace(s)
 }
 
-// nombreBaseActa arma el nombre descriptivo del acta (sin extensión) según
-// el tipo: quién entrega, quién recibe o ambos, más la fecha del acta en
-// formato ISO (AAAA-MM-DD).
+// nombreBaseActa arma el nombre descriptivo del acta (sin extensión): tipo,
+// área y fecha del acta en formato ISO (AAAA-MM-DD).
 func nombreBaseActa(acta models.Acta) string {
 	fecha := acta.Fecha.Format("2006-01-02")
 
@@ -59,7 +64,7 @@ func nombreBaseActa(acta models.Acta) string {
 	case models.TipoActaRecibimiento:
 		base = fmt.Sprintf("Acta de Recibimiento - %s - %s", acta.AreaDepartamento, fecha)
 	default: // models.TipoActaAmbos
-		base = fmt.Sprintf("Acta - %s - %s - %s", acta.AreaDepartamento, acta.QuienRecibe, fecha)
+		base = fmt.Sprintf("Acta de Entrega y Recibimiento - %s - %s", acta.AreaDepartamento, fecha)
 	}
 
 	return sanitizarNombreArchivo(base)
@@ -77,8 +82,11 @@ func nombreBaseDisponible(base string) string {
 }
 
 func existeConEsaBase(base string) bool {
-	for _, ext := range []string{".docx", ".pdf"} {
-		if _, err := os.Stat(filepath.Join(outputDir, base+ext)); err == nil {
+	for _, ruta := range []string{
+		filepath.Join(outputDir, base+".docx"),
+		filepath.Join(outputDirPDF, base+".pdf"),
+	} {
+		if _, err := os.Stat(ruta); err == nil {
 			return true
 		}
 	}
