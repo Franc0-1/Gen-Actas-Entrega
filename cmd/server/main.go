@@ -54,6 +54,7 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", healthHandler)
 	mux.HandleFunc("/api/actas/generar", handlers.GenerarActaHandler)
+	mux.HandleFunc("/api/notas-retiro/generar", handlers.GenerarNotaRetiroHandler)
 	mux.Handle("/", http.FileServer(http.Dir("templates/web")))
 	mux.Handle("/output/", http.StripPrefix("/output/", http.FileServer(http.Dir("output"))))
 

@@ -13,9 +13,10 @@ import (
 )
 
 const (
-	plantillaPath = "templates/docx/plantilla_acta.docx"
-	outputDir     = "output/Docx"
-	outputDirPDF  = "output/PDF"
+	plantillaPath       = "templates/docx/plantilla_acta.docx"
+	plantillaRetiroPath = "templates/docx/plantilla_retiro.docx"
+	outputDir           = "output/Docx"
+	outputDirPDF        = "output/PDF"
 )
 
 // Los directorios de salida pueden no existir todavía en un contenedor
@@ -95,6 +96,24 @@ func GenerarActa(acta models.Acta) (string, error) {
 	docxPath := filepath.Join(outputDir, base+".docx")
 
 	if err := generator.Generate(acta, plantillaPath, docxPath); err != nil {
+		return "", err
+	}
+
+	pdfPath, err := generator.ConvertirAPDF(docxPath, outputDirPDF)
+	if err != nil {
+		return "", err
+	}
+
+	return filepath.Base(pdfPath), nil
+}
+
+// GenerarNotaRetiro genera el DOCX y el PDF de una nota de retiro, igual que
+// GenerarActa, y devuelve el nombre del PDF.
+func GenerarNotaRetiro(nota models.NotaRetiro) (string, error) {
+	base := nombreBaseDisponible(sanitizarNombreArchivo(fmt.Sprintf("Nota de Retiro - %s - %s", nota.Empresa, nota.Fecha.Format("2006-01-02"))))
+	docxPath := filepath.Join(outputDir, base+".docx")
+
+	if err := generator.GenerateNotaRetiro(nota, plantillaRetiroPath, docxPath); err != nil {
 		return "", err
 	}
 

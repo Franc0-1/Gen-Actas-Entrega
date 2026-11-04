@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nota de Retiro</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h1>Generar nota de retiro</h1>
+        <p class="subtitle">Nota a la Guardia Policial de Casa de Gobierno. <a href="index.html">Volver a actas de entrega</a></p>
+      </div>
+      <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Cambiar a modo oscuro">🌙</button>
+    </div>
+
+    <form id="retiro-form">
+      <section class="form-section">
+        <h2>Datos de la nota</h2>
+        <div class="form-grid">
+          <label>
+            Fecha
+            <input type="date" id="fecha" required>
+          </label>
+          <label>
+            Empresa que retira
+            <input type="text" id="empresa" placeholder="Ej. Bienes y Servicios 3M" required>
+          </label>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <h2>Elementos a retirar</h2>
+        <div id="elementos-container"></div>
+        <button type="button" id="agregar-elemento" class="btn btn-secondary">+ Agregar elemento</button>
+      </section>
+
+      <section class="form-section form-section--acciones">
+        <div class="acciones-form">
+          <button type="submit" class="btn btn-primary">Generar Nota</button>
+        </div>
+      </section>
+    </form>
+  </div>
+
+  <script src="retiro.js"></script>
+</body>
+</html>

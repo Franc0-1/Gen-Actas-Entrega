@@ -407,3 +407,9 @@ button {
   text-decoration: underline;
   font-weight: 600;
 }
+
+/* Fila de la nota de retiro: solo descripción + botón quitar. */
+.elemento-row.elemento-row--simple {
+  grid-template-columns: 1fr auto;
+  min-width: 0;
+}

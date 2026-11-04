@@ -19,6 +19,20 @@ func Generate(acta models.Acta, templatePath string, outputPath string) error {
 		return fmt.Errorf("acta inválida: %w", err)
 	}
 
+	return reescribirDocumento(templatePath, outputPath, func(docXML string) (string, error) {
+		docXML = aplicarPlaceholdersSimples(docXML, acta)
+		docXML, err := aplicarTablas(docXML, acta.Elementos)
+		if err != nil {
+			return "", fmt.Errorf("no se pudieron armar las tablas: %w", err)
+		}
+		return docXML, nil
+	})
+}
+
+// reescribirDocumento copia la plantilla en outputPath aplicando transformar
+// sobre word/document.xml. El resto de las partes del .docx (membrete,
+// estilos, imágenes) se copian sin cambios.
+func reescribirDocumento(templatePath, outputPath string, transformar func(string) (string, error)) error {
 	r, err := zip.OpenReader(templatePath)
 	if err != nil {
 		return fmt.Errorf("no se pudo abrir la plantilla: %w", err)
@@ -52,11 +66,9 @@ func Generate(acta models.Acta, templatePath string, outputPath string) error {
 		return fmt.Errorf("la plantilla no contiene %s", nombreDocumentoXML)
 	}
 
-	docXML = aplicarPlaceholdersSimples(docXML, acta)
-
-	docXML, err = aplicarTablas(docXML, acta.Elementos)
+	docXML, err = transformar(docXML)
 	if err != nil {
-		return fmt.Errorf("no se pudieron armar las tablas: %w", err)
+		return err
 	}
 
 	archivos[nombreDocumentoXML] = []byte(docXML)

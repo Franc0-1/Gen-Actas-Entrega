@@ -43,6 +43,38 @@ func GenerarActaHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// GenerarNotaRetiroHandler atiende POST /api/notas-retiro/generar, con el
+// mismo flujo y formato de respuesta que GenerarActaHandler.
+func GenerarNotaRetiroHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		responderJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "método no permitido"})
+		return
+	}
+
+	var nota models.NotaRetiro
+	if err := json.NewDecoder(r.Body).Decode(&nota); err != nil {
+		responderJSON(w, http.StatusBadRequest, map[string]string{"error": "JSON inválido: " + err.Error()})
+		return
+	}
+
+	if err := nota.Validate(); err != nil {
+		responderJSON(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
+		return
+	}
+
+	nombreArchivo, err := services.GenerarNotaRetiro(nota)
+	if err != nil {
+		responderJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return
+	}
+
+	responderJSON(w, http.StatusCreated, map[string]string{
+		"mensaje":     "nota generada correctamente",
+		"archivo":     nombreArchivo,
+		"descargaUrl": "/output/PDF/" + nombreArchivo,
+	})
+}
+
 func responderJSON(w http.ResponseWriter, status int, body any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
