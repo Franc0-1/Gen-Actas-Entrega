@@ -64,8 +64,10 @@ const campoAreaDepartamentoOtra = document.getElementById('areaDepartamentoOtra'
 const selectQuienPresenta = document.getElementById('quienPresenta');
 const campoQuienPresentaOtro = document.getElementById('quienPresentaOtro');
 
-// Quién presenta usa la misma lista que el área.
+// Quién presenta usa la misma lista que el área, más Oficina de Sistemas.
 selectQuienPresenta.innerHTML = selectAreaDepartamento.innerHTML;
+selectQuienPresenta.querySelector('option[value="otros"]')
+  .before(new Option('Oficina de Sistemas', 'Oficina de Sistemas'));
 
 // conOtros: con "Otros" seleccionado se pide el nombre puntual en un input
 // aparte (visible y obligatorio solo en ese caso), que se manda en lugar del
