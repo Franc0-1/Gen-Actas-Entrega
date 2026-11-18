@@ -46,8 +46,6 @@ const documentoActual = () => form.elements.documento.value;
 const esRetiro = () => documentoActual() === 'retiro';
 const tipoSelect = document.getElementById('tipo');
 const tipoActual = () => tipoSelect.value;
-const campoQuienEntrega = document.getElementById('quienEntrega');
-const labelQuienEntrega = campoQuienEntrega.closest('label');
 const textoAreaDepartamento = document.getElementById('areaDepartamentoTexto');
 
 // El campo "Quién recibe" se reemplazó por el área: su texto indica qué rol
@@ -63,18 +61,29 @@ const headerDireccion = document.querySelector('.items-head .col-direccion');
 
 const selectAreaDepartamento = document.getElementById('areaDepartamento');
 const campoAreaDepartamentoOtra = document.getElementById('areaDepartamentoOtra');
-const labelAreaDepartamentoOtra = campoAreaDepartamentoOtra.closest('label');
+const selectQuienPresenta = document.getElementById('quienPresenta');
+const campoQuienPresentaOtro = document.getElementById('quienPresentaOtro');
 
-// Con "Otros" seleccionado se pide el nombre puntual del área en un input
-// aparte, que se manda como areaDepartamento en vez del valor del select.
-function actualizarAreaDepartamentoOtra() {
-  const esOtros = selectAreaDepartamento.value === 'otros';
-  labelAreaDepartamentoOtra.hidden = !esOtros;
-  campoAreaDepartamentoOtra.required = esOtros;
+// Quién presenta usa la misma lista que el área.
+selectQuienPresenta.innerHTML = selectAreaDepartamento.innerHTML;
+
+// conOtros: con "Otros" seleccionado se pide el nombre puntual en un input
+// aparte (visible y obligatorio solo en ese caso), que se manda en lugar del
+// valor del select (ver valorConOtros).
+function conOtros(select, campoOtro) {
+  const actualizar = () => {
+    const esOtros = select.value === 'otros';
+    campoOtro.closest('label').hidden = !esOtros;
+    campoOtro.required = esOtros;
+  };
+  select.addEventListener('change', actualizar);
+  actualizar();
 }
 
-selectAreaDepartamento.addEventListener('change', actualizarAreaDepartamentoOtra);
-actualizarAreaDepartamentoOtra();
+const valorConOtros = (select, campoOtro) => (select.value === 'otros' ? campoOtro.value : select.value);
+
+conOtros(selectAreaDepartamento, campoAreaDepartamentoOtra);
+conOtros(selectQuienPresenta, campoQuienPresentaOtro);
 
 // Por defecto la fecha es la de hoy (fecha local del navegador); el
 // usuario sigue pudiendo cambiarla, no queda bloqueada.
@@ -132,19 +141,13 @@ function aplicarDireccionEnFila(fila, tipo) {
   }
 }
 
-// actualizarCamposPorTipo muestra/oculta y (des)marca required en los campos
-// de persona según el tipo elegido, y resincroniza la dirección de todas las
-// filas de elementos ya creadas.
+// actualizarCamposPorTipo ajusta el texto del área según el tipo elegido y
+// resincroniza la dirección de todas las filas de elementos ya creadas.
+// "Quién presenta" figura en el acta de cualquier tipo: siempre visible.
 function actualizarCamposPorTipo() {
   const tipo = tipoActual();
-  const mostrarEntrega = tipo === 'entrega' || tipo === 'ambos';
 
   document.body.classList.toggle('modo-ambos', tipo === 'ambos');
-  // QuienEntrega conserva su valor (por defecto "Oficina de Sistemas") al
-  // ocultarse: no tiene sentido pedirlo de nuevo cada vez que se vuelve a
-  // mostrar.
-  labelQuienEntrega.hidden = !mostrarEntrega;
-  campoQuienEntrega.required = mostrarEntrega;
 
   textoAreaDepartamento.textContent = TEXTO_AREA_POR_TIPO[tipo];
 
@@ -431,15 +434,13 @@ form.addEventListener('submit', async (event) => {
     return;
   }
 
-  const areaDepartamento = selectAreaDepartamento.value === 'otros'
-    ? campoAreaDepartamentoOtra.value
-    : selectAreaDepartamento.value;
+  const areaDepartamento = valorConOtros(selectAreaDepartamento, campoAreaDepartamentoOtra);
 
   const retiro = esRetiro();
   const url = retiro ? '/api/notas-retiro/generar' : '/api/actas/generar';
   const cuerpo = retiro ? leerNotaRetiro(fecha) : {
     fecha,
-    quienEntrega: document.getElementById('quienEntrega').value,
+    quienEntrega: valorConOtros(selectQuienPresenta, campoQuienPresentaOtro),
     tipo: tipoActual(),
     areaDepartamento,
     elementos: leerElementos(),

@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"net/url"
 
 	"actas-project/internal/models"
 	"actas-project/internal/services"
@@ -23,8 +24,6 @@ func GenerarActaHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	acta.AplicarValoresPorDefecto()
-
 	if err := acta.Validate(); err != nil {
 		responderJSON(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
 		return
@@ -39,7 +38,7 @@ func GenerarActaHandler(w http.ResponseWriter, r *http.Request) {
 	responderJSON(w, http.StatusCreated, map[string]string{
 		"mensaje":     "acta generada correctamente",
 		"archivo":     nombreArchivo,
-		"descargaUrl": "/output/PDF/" + nombreArchivo,
+		"descargaUrl": urlDescarga(nombreArchivo),
 	})
 }
 
@@ -71,8 +70,14 @@ func GenerarNotaRetiroHandler(w http.ResponseWriter, r *http.Request) {
 	responderJSON(w, http.StatusCreated, map[string]string{
 		"mensaje":     "nota generada correctamente",
 		"archivo":     nombreArchivo,
-		"descargaUrl": "/output/PDF/" + nombreArchivo,
+		"descargaUrl": urlDescarga(nombreArchivo),
 	})
+}
+
+// urlDescarga arma la ruta pública del PDF, codificando el nombre: sin esto un
+// "#" o "%" en el área o la empresa rompe el enlace (el navegador corta en "#").
+func urlDescarga(nombreArchivo string) string {
+	return "/output/PDF/" + url.PathEscape(nombreArchivo)
 }
 
 func responderJSON(w http.ResponseWriter, status int, body any) {

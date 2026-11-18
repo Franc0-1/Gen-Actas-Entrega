@@ -69,7 +69,7 @@ Ambos endpoints reciben JSON por `POST` y responden `201` con
 {
   "fecha": "2026-11-04T00:00:00Z",
   "tipo": "entrega | recibimiento | ambos",
-  "quienEntrega": "Oficina de Sistemas",
+  "quienEntrega": "Fiduciaria",
   "areaDepartamento": "Prensa",
   "elementos": [
     {
@@ -85,8 +85,8 @@ Ambos endpoints reciben JSON por `POST` y responden `201` con
 
 - `retira`: el área se lleva el elemento; `entrega`: el área lo devuelve.
 - Entrega solo admite `retira` y recibimiento solo `entrega`.
-- `quienEntrega` se completa con "Oficina de Sistemas" si llega vacío en
-  entrega y ambos.
+- `quienEntrega` (quién presenta) es obligatorio en todos los tipos y aparece
+  en el texto: "se presenta <quienEntrega> por ante esta oficina de Sistemas".
 
 ### `POST /api/notas-retiro/generar`
 
@@ -108,7 +108,7 @@ Ambos endpoints reciben JSON por `POST` y responden `201` con
 
 | Plantilla | Marcadores |
 |---|---|
-| `plantilla_acta.docx` | `{{dia_texto}}`, `{{mes_texto}}`, `{{anio_texto}}`, `{{tipo_texto}}`, `{{area_departamento}}`; en las tablas "Retira" y "Entrega": `{{descripcion}}`, `{{nro_inventario}}`, `{{cantidad}}`, `{{observacion}}` |
+| `plantilla_acta.docx` | `{{dia_texto}}`, `{{mes_texto}}`, `{{anio_texto}}`, `{{quien_presenta}}`, `{{tipo_texto}}`, `{{area_departamento}}`; en las tablas "Retira" y "Entrega": `{{descripcion}}`, `{{nro_inventario}}`, `{{cantidad}}`, `{{observacion}}` |
 | `plantilla_retiro.docx` | `{{fecha_larga}}`, `{{empresa}}`, `{{detalle_elementos}}` |
 
 Al editar una plantilla en Word, cada marcador tiene que quedar escrito de

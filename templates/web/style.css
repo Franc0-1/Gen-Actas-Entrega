@@ -309,6 +309,76 @@ form select {
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
+/* Flecha propia, más fina que la del navegador; el gris medio se lee en los
+   dos temas (un data URI no puede usar variables CSS). */
+form select {
+  appearance: none;
+  padding-right: 2.5rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a919c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.875rem center;
+  background-size: 1rem;
+  cursor: pointer;
+}
+
+/* Lista desplegada con bordes redondeados y sombra suave. Solo en navegadores
+   con select personalizable (Chrome/Edge 135+); el resto muestra la lista
+   nativa del sistema, igual que antes. */
+@supports (appearance: base-select) {
+  form select,
+  form select::picker(select) {
+    appearance: base-select;
+  }
+
+  /* Con base-select el texto ya no se centra solo en el alto fijo del campo
+     (display: block lo deja arriba). */
+  form select {
+    display: flex;
+    align-items: center;
+  }
+
+  form select::picker-icon {
+    display: none;
+  }
+
+  form select::picker(select) {
+    margin-top: 0.25rem;
+    padding: 0.25rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-card);
+    color: var(--color-text);
+    box-shadow: var(--shadow-card);
+  }
+
+  form select option {
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  form select option:hover,
+  form select option:focus-visible {
+    background: var(--color-subtle);
+    outline: none;
+  }
+
+  form select option:checked {
+    background: var(--color-primary-soft);
+    color: var(--color-primary-ink);
+    font-weight: 500;
+  }
+
+  form select option::checkmark {
+    display: none;
+  }
+
+  form select option:disabled {
+    color: var(--color-text-muted);
+    cursor: default;
+  }
+}
+
 form input::placeholder {
   color: var(--color-text-muted);
   opacity: 0.7;

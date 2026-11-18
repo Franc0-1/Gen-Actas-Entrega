@@ -140,6 +140,11 @@ func TestGenerate_ActaAmbos(t *testing.T) {
 
 	texto := extraerTexto(t, docXML)
 
+	// Quién presenta, en su lugar del párrafo inicial.
+	if !strings.Contains(texto, "se presenta Juan Pérez por ante esta oficina") {
+		t.Errorf("el texto generado no incluye a quién presenta en el párrafo inicial")
+	}
+
 	// 4. Fecha en palabras.
 	for _, esperado := range []string{"TREINTA Y UN", "AGOSTO", "DOS MIL VEINTISEIS"} {
 		if !strings.Contains(texto, esperado) {

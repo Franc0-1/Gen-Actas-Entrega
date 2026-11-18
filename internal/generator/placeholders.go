@@ -34,7 +34,7 @@ func tipoATexto(tipo models.TipoActa) string {
 }
 
 // aplicarPlaceholdersSimples reemplaza los placeholders de texto simple
-// (fecha, tipo de acta, área/departamento) por los valores del acta.
+// (fecha, tipo de acta, quién presenta, área/departamento) por los valores del acta.
 func aplicarPlaceholdersSimples(docXML string, acta models.Acta) string {
 	diaTexto, mesTexto, anioTexto := FechaEnPalabras(acta.Fecha)
 
@@ -43,6 +43,7 @@ func aplicarPlaceholdersSimples(docXML string, acta models.Acta) string {
 		"mes_texto":         mesTexto,
 		"anio_texto":        anioTexto,
 		"tipo_texto":        tipoATexto(acta.Tipo),
+		"quien_presenta":    escaparXML(acta.QuienEntrega),
 		"area_departamento": escaparXML(acta.AreaDepartamento),
 	}
 

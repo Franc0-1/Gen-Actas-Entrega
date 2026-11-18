@@ -91,20 +91,6 @@ type Acta struct {
 	Elementos        []Elemento `json:"elementos"`
 }
 
-// valorPorDefectoQuienEntrega se asigna cuando la petición no informa
-// QuienEntrega en una acta que lo requiere: la oficina que entrega equipos
-// es siempre la misma.
-const valorPorDefectoQuienEntrega = "Oficina de Sistemas"
-
-// AplicarValoresPorDefecto completa QuienEntrega con el valor institucional
-// fijo cuando viene vacío y el tipo de acta lo requiere (entrega o ambos).
-// Debe llamarse antes de Validate().
-func (a *Acta) AplicarValoresPorDefecto() {
-	if a.QuienEntrega == "" && (a.Tipo == TipoActaEntrega || a.Tipo == TipoActaAmbos) {
-		a.QuienEntrega = valorPorDefectoQuienEntrega
-	}
-}
-
 // Validate verifica que el acta tenga los datos mínimos necesarios para
 // poder generarse. No valida reglas de negocio más allá de eso.
 func (a Acta) Validate() error {
@@ -118,11 +104,10 @@ func (a Acta) Validate() error {
 		return errors.New("la fecha del acta no puede ser futura")
 	}
 
-	// Quién entrega solo se exige cuando la oficina entrega elementos
-	// (entrega o ambos). Del lado que recibe se identifica el área, que se
-	// valida abajo para todos los tipos.
-	if (a.Tipo == TipoActaEntrega || a.Tipo == TipoActaAmbos) && a.QuienEntrega == "" {
-		return errors.New("el acta debe indicar quién entrega")
+	// QuienEntrega es "quién presenta": figura en el texto de todos los tipos
+	// de acta ("se presenta ... por ante esta oficina"), así que siempre se exige.
+	if a.QuienEntrega == "" {
+		return errors.New("el acta debe indicar quién presenta")
 	}
 
 	if a.AreaDepartamento == "" {

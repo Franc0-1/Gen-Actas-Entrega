@@ -53,17 +53,29 @@ func TestValidate_Entrega(t *testing.T) {
 }
 
 func TestValidate_Recibimiento(t *testing.T) {
-	t.Run("válida solo con área, sin personas", func(t *testing.T) {
+	t.Run("válida con QuienEntrega y elemento entrega", func(t *testing.T) {
 		acta := actaBase(TipoActaRecibimiento)
+		acta.QuienEntrega = "Fiduciaria"
 		acta.Elementos = []Elemento{elementoEntrega()}
 
 		if err := acta.Validate(); err != nil {
-			t.Errorf("recibimiento no debería exigir personas, solo el área, error: %v", err)
+			t.Errorf("acta válida de tipo recibimiento no debería fallar, error: %v", err)
+		}
+	})
+
+	// Quién presenta figura en el texto de todos los tipos, también recibimiento.
+	t.Run("inválida sin QuienEntrega", func(t *testing.T) {
+		acta := actaBase(TipoActaRecibimiento)
+		acta.Elementos = []Elemento{elementoEntrega()}
+
+		if err := acta.Validate(); err == nil {
+			t.Error("debería exigir QuienEntrega en tipo recibimiento")
 		}
 	})
 
 	t.Run("inválida con elemento de dirección retira", func(t *testing.T) {
 		acta := actaBase(TipoActaRecibimiento)
+		acta.QuienEntrega = "Fiduciaria"
 		acta.Elementos = []Elemento{elementoRetira()}
 
 		if err := acta.Validate(); err == nil {
